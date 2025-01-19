@@ -44,6 +44,7 @@ export default function AddHabit() {
       icon: selectedCategory.icon,
       backgroundColor: selectedCategory.color,
       frequency,
+      startDate: new Date().toISOString().split("T")[0], // Save the current date in YYYY-MM-DD format
       history: {}, // Start with no history
     };
 
