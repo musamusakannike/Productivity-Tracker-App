@@ -24,12 +24,17 @@ export default function Habits() {
     const fetchHabits = async () => {
       const storedHabits = await loadData("habits");
       setHabits(storedHabits || []);
-      console.log("Habits loaded" + JSON.stringify(storedHabits));
+      console.log("Habits loaded: ", JSON.stringify(storedHabits));
     };
     fetchHabits();
   }, []);
 
   const dates = generateDates(30);
+
+  // Filter habits based on whether the start date is before or equal to the selected date
+  const filteredHabits = habits.filter(
+    (habit) => new Date(habit.startDate) <= new Date(selectedDate)
+  );
 
   // Calculate accuracy for a habit
   const calculateAccuracy = (history) => {
@@ -45,7 +50,7 @@ export default function Habits() {
 
   const toggleCompletion = async (habitId) => {
     const today = new Date().toISOString().split("T")[0]; // Get today's date.
-  
+
     // Check if the selected date is today.
     if (selectedDate !== today) {
       Alert.alert(
@@ -54,7 +59,7 @@ export default function Habits() {
       );
       return; // Exit the function if the selected date is not today.
     }
-  
+
     // Proceed to toggle the completion status.
     const updatedHabits = habits.map((habit) => {
       if (habit.id === habitId) {
@@ -66,7 +71,7 @@ export default function Habits() {
       }
       return habit;
     });
-  
+
     setHabits(updatedHabits);
     await saveData("habits", updatedHabits);
   };
@@ -130,7 +135,7 @@ export default function Habits() {
 
         {/* Habits List */}
         <View className="px-4 mt-6">
-          {habits.map((habit) => (
+          {filteredHabits.map((habit) => (
             <View
               key={habit.id}
               className="bg-white dark:bg-gray-800 p-4 rounded-lg mb-4"
