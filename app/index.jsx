@@ -1,10 +1,38 @@
-// file: pages/home.js
-import React from "react";
-import { View, Text, ScrollView, TouchableOpacity } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, ScrollView, TouchableOpacity, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { saveData, loadData } from "../utils/storage";
 
 export default function Home() {
+  const [habits, setHabits] = useState([]);
+
+  // Load habits on mount
+  useEffect(() => {
+    const loadHabitsFromStorage = async () => {
+      const storedHabits = await loadData("habits");
+      setHabits(storedHabits);
+    };
+    loadHabitsFromStorage();
+  }, []);
+
+  // Save habits whenever they change
+  useEffect(() => {
+    saveData("habits", habits);
+  }, [habits]);
+
+  const toggleHabitCompletion = (id) => {
+    const updatedHabits = habits.map((habit) =>
+      habit.id === id ? { ...habit, completed: !habit.completed } : habit
+    );
+    setHabits(updatedHabits);
+  };
+
+  const deleteHabit = (id) => {
+    const updatedHabits = habits.filter((habit) => habit.id !== id);
+    setHabits(updatedHabits);
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900">
       {/* Header */}
@@ -17,68 +45,44 @@ export default function Home() {
         </Text>
       </View>
 
-      {/* Quick Overview Section */}
-      <View className="px-6 mt-4">
-        <View className="flex-row justify-between">
-          {[
-            { label: "Habits", value: "5/7", note: "71% Completed" },
-            { label: "Routines", value: "3", note: "Pending Today" },
-            { label: "Goals", value: "2", note: "Active Goals" },
-          ].map((item, index) => (
-            <View
-              key={index}
-              className="flex-1 mx-1 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm"
-            >
-              <Text className="text-sm text-gray-600 dark:text-gray-400">
-                {item.label}
-              </Text>
-              <Text className="text-2xl font-bold text-gray-800 dark:text-gray-100">
-                {item.value}
-              </Text>
-              <Text className="text-xs text-[#800020] dark:text-[#e26685d4]">{item.note}</Text>
-            </View>
-          ))}
-        </View>
-      </View>
-
       {/* Main Content */}
       <ScrollView
         className="flex-1 px-6 mt-6"
         contentContainerStyle={{ paddingBottom: 20 }}
       >
-        {/* Today's Habits */}
         <Text className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-2">
           Today's Habits
         </Text>
         <View className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-          {["Morning Walk", "Meditation"].map((habit, index) => (
+          {habits.map((habit) => (
             <TouchableOpacity
-              key={index}
+              key={habit.id}
               className="flex-row items-center justify-between mb-3"
+              onPress={() => toggleHabitCompletion(habit.id)}
             >
-              <Text className="text-base text-gray-800 dark:text-gray-100">
-                {habit}
+              <Text
+                className={`text-base ${
+                  habit.completed
+                    ? "line-through text-gray-500"
+                    : "text-gray-800 dark:text-gray-100"
+                }`}
+              >
+                {habit.name}
               </Text>
               <Ionicons
-                name="checkmark-circle-outline"
+                name={
+                  habit.completed
+                    ? "checkmark-circle"
+                    : "checkmark-circle-outline"
+                }
                 size={24}
-                color="#800020"
+                color={habit.completed ? "#800020" : "#808080"}
               />
+              <TouchableOpacity onPress={() => deleteHabit(habit.id)}>
+                <Ionicons name="trash-outline" size={20} color="red" />
+              </TouchableOpacity>
             </TouchableOpacity>
           ))}
-        </View>
-
-        {/* Active Goals */}
-        <Text className="text-lg font-bold text-gray-800 dark:text-gray-100 mt-6 mb-2">
-          Active Goals
-        </Text>
-        <View className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-          <Text className="text-base text-gray-800 dark:text-gray-100 mb-2">
-            Read 5 Books
-          </Text>
-          <View className="h-2 bg-gray-300 rounded-full overflow-hidden">
-            <View className="h-full w-2/5 bg-[#800020]" />
-          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
