@@ -135,88 +135,106 @@ export default function Habits() {
 
         {/* Habits List */}
         <View className="px-4 mt-6">
-          {filteredHabits.map((habit) => (
-            <View
-              key={habit.id}
-              className="bg-white dark:bg-gray-800 p-4 rounded-lg mb-4"
-            >
-              {/* Habit Header */}
-              <View className="flex-row items-center justify-between">
-                <Text className="text-lg font-bold text-gray-800 dark:text-gray-100">
-                  {habit.name}
+          {filteredHabits.length > 0 ? (
+            filteredHabits.map((habit) => (
+              <View
+                key={habit.id}
+                className="bg-white dark:bg-gray-800 p-4 rounded-lg mb-4"
+              >
+                {/* Habit Header */}
+                <View className="flex-row items-center justify-between">
+                  <Text className="text-lg font-bold text-gray-800 dark:text-gray-100">
+                    {habit.name}
+                  </Text>
+                  <Ionicons
+                    name={habit.icon}
+                    size={28}
+                    color={habit.backgroundColor}
+                  />
+                </View>
+
+                {/* Frequency Tag */}
+                <Text
+                  style={{ backgroundColor: habit.backgroundColor }}
+                  className="text-white px-2 py-1 rounded-full text-xs font-bold mt-2 self-start"
+                >
+                  {habit.frequency}
                 </Text>
-                <Ionicons
-                  name={habit.icon}
-                  size={28}
-                  color={habit.backgroundColor}
-                />
-              </View>
 
-              {/* Frequency Tag */}
-              <Text
-                style={{ backgroundColor: habit.backgroundColor }}
-                className="text-white px-2 py-1 rounded-full text-xs font-bold mt-2 self-start"
-              >
-                {habit.frequency}
-              </Text>
-
-              {/* Completion Status */}
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                className="mt-4"
-              >
-                {dates.map((date) => (
-                  <View
-                    key={date}
-                    className={`w-10 h-10 rounded-full mx-1 flex items-center justify-center border-2 ${
-                      habit.history && habit.history[date]
-                        ? "border-green-500"
-                        : "border-red-500"
-                    }`}
-                  >
-                    <Text
-                      className={`text-sm font-medium ${
+                {/* Completion Status */}
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  className="mt-4"
+                >
+                  {dates.map((date) => (
+                    <View
+                      key={date}
+                      className={`w-10 h-10 rounded-full mx-1 flex items-center justify-center border-2 ${
                         habit.history && habit.history[date]
-                          ? "text-green-500"
-                          : "text-red-500"
+                          ? "border-green-500"
+                          : "border-red-500"
                       }`}
                     >
-                      {new Date(date).getDate()}
+                      <Text
+                        className={`text-sm font-medium ${
+                          habit.history && habit.history[date]
+                            ? "text-green-500"
+                            : "text-red-500"
+                        }`}
+                      >
+                        {new Date(date).getDate()}
+                      </Text>
+                    </View>
+                  ))}
+                </ScrollView>
+
+                {/* Actions */}
+                <View className="flex-row justify-between items-center mt-4">
+                  {/* Mark as Done/Undone */}
+                  <TouchableOpacity
+                    onPress={() => toggleCompletion(habit.id)}
+                    className="px-4 py-2 rounded-lg bg-[#800020]"
+                  >
+                    <Text className="text-white font-bold">
+                      {habit.history?.[selectedDate]
+                        ? "Mark Undone"
+                        : "Mark Done"}
                     </Text>
-                  </View>
-                ))}
-              </ScrollView>
+                  </TouchableOpacity>
 
-              {/* Actions */}
-              <View className="flex-row justify-between items-center mt-4">
-                {/* Mark as Done/Undone */}
-                <TouchableOpacity
-                  onPress={() => toggleCompletion(habit.id)}
-                  className="px-4 py-2 rounded-lg bg-[#800020]"
-                >
-                  <Text className="text-white font-bold">
-                    {habit.history?.[selectedDate]
-                      ? "Mark Undone"
-                      : "Mark Done"}
-                  </Text>
-                </TouchableOpacity>
+                  {/* Delete Button */}
+                  <TouchableOpacity
+                    onPress={() => deleteHabit(habit.id)}
+                    className="px-4 py-2 rounded-lg bg-red-500"
+                  >
+                    <Text className="text-white font-bold">Delete</Text>
+                  </TouchableOpacity>
+                </View>
 
-                {/* Delete Button */}
-                <TouchableOpacity
-                  onPress={() => deleteHabit(habit.id)}
-                  className="px-4 py-2 rounded-lg bg-red-500"
-                >
-                  <Text className="text-white font-bold">Delete</Text>
-                </TouchableOpacity>
+                {/* Accuracy */}
+                <Text className="text-sm font-semibold text-gray-600 dark:text-gray-400 mt-2">
+                  Accuracy: {calculateAccuracy(habit.history)}%
+                </Text>
               </View>
-
-              {/* Accuracy */}
-              <Text className="text-sm font-semibold text-gray-600 dark:text-gray-400 mt-2">
-                Accuracy: {calculateAccuracy(habit.history)}%
+            ))
+          ) : (
+            // Empty State Display
+            <View className="mt-10 items-center">
+              <Ionicons
+                name="sad-outline"
+                size={64}
+                color="gray"
+                className="mb-4"
+              />
+              <Text className="text-lg font-semibold text-gray-600 dark:text-gray-400 text-center">
+                No habits found for the selected date.
+              </Text>
+              <Text className="text-sm text-gray-500 dark:text-gray-400 text-center mt-2">
+                Try selecting a different date or add a new habit.
               </Text>
             </View>
-          ))}
+          )}
         </View>
       </ScrollView>
 
