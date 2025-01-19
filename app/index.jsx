@@ -36,9 +36,9 @@ export default function Home() {
   return (
     <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900">
       {/* Header */}
-      <View className="px-6 py-4 bg-gray-50 dark:bg-gray-800">
+      <View className="px-6 py-4">
         <Text className="text-xl font-bold text-gray-800 dark:text-gray-100">
-          Hello, John!
+          Hello, User!
         </Text>
         <Text className="text-sm text-gray-600 dark:text-gray-400">
           {new Date().toLocaleDateString()}
@@ -53,37 +53,6 @@ export default function Home() {
         <Text className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-2">
           Today's Habits
         </Text>
-        <View className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-          {habits.map((habit) => (
-            <TouchableOpacity
-              key={habit.id}
-              className="flex-row items-center justify-between mb-3"
-              onPress={() => toggleHabitCompletion(habit.id)}
-            >
-              <Text
-                className={`text-base ${
-                  habit.completed
-                    ? "line-through text-gray-500"
-                    : "text-gray-800 dark:text-gray-100"
-                }`}
-              >
-                {habit.name}
-              </Text>
-              <Ionicons
-                name={
-                  habit.completed
-                    ? "checkmark-circle"
-                    : "checkmark-circle-outline"
-                }
-                size={24}
-                color={habit.completed ? "#800020" : "#808080"}
-              />
-              <TouchableOpacity onPress={() => deleteHabit(habit.id)}>
-                <Ionicons name="trash-outline" size={20} color="red" />
-              </TouchableOpacity>
-            </TouchableOpacity>
-          ))}
-        </View>
       </ScrollView>
     </SafeAreaView>
   );
