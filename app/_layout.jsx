@@ -37,7 +37,7 @@ export default function Layout() {
       name: "Goals", 
       icon: "trophy-outline", 
       route: "/goals", 
-      activeRoutes: ["/goals", "/goals/progress"] 
+      activeRoutes: ["/goals", "/add-goal"] 
     },
     { 
       name: "Profile", 
