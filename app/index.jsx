@@ -10,10 +10,16 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useColorScheme } from "react-native";
+import { quotes } from "../utils/quotes";
 
 export default function Home() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [userName, setUserName] = useState("User");
+  const [randomQuote, setRandomQuote] = useState(null);
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme === "dark";
 
   useEffect(() => {
     // AsyncStorage.clear()
@@ -26,8 +32,31 @@ export default function Home() {
       }
       setLoading(false);
     };
+
+    const fetchUserName = async () => {
+      const account = await AsyncStorage.getItem("userAccount");
+      if (account) {
+        const { name } = JSON.parse(account);
+        setUserName(name || "User");
+      }
+    };
+
+    const pickRandomQuote = () => {
+      const randomIndex = Math.floor(Math.random() * quotes.length);
+      setRandomQuote(quotes[randomIndex]);
+    };
+
     checkAccount();
+    fetchUserName();
+    pickRandomQuote();
   }, []);
+
+  const today = new Date().toLocaleDateString(undefined, {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
 
   if (loading) {
     return (
@@ -38,102 +67,65 @@ export default function Home() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-100 dark:bg-gray-900">
-      <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
-        {/* Header */}
-        <View className="px-6 py-4 bg-gray-50 dark:bg-gray-800">
-          <Text className="text-xl font-bold text-gray-800 dark:text-gray-100">
-            Hello, John!
+    <SafeAreaView className={`flex-1 bg-gray-100 dark:bg-gray-900 px-6`}>
+      {/* Header */}
+      <View className="mt-6">
+        <Text className="text-2xl font-bold text-gray-800 dark:text-gray-100">
+          Welcome, {userName}!
+        </Text>
+        <Text className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+          {today}
+        </Text>
+      </View>
+
+      {/* Motivational Quote */}
+      {randomQuote && (
+        <View className="mt-6 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
+          <Text className="text-lg font-semibold text-gray-800 dark:text-gray-100 text-center">
+            "{randomQuote.quote}"
           </Text>
-          <Text className="text-sm text-gray-600 dark:text-gray-400">
-            {new Date().toLocaleDateString(undefined, {
-              weekday: "long",
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
+          <Text className="text-sm text-gray-600 dark:text-gray-400 text-center mt-2 italic">
+            - {randomQuote.author}
           </Text>
         </View>
+      )}
 
-        {/* Quick Overview */}
-        <View className="px-6 mt-4 flex-row justify-between">
+      {/* Action Buttons */}
+      <View className="mt-10">
+        <Text className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4">
+          Quick Actions
+        </Text>
+        <View className="flex-row justify-between">
           {[
-            { label: "Habits Completed", value: "5/7" },
-            { label: "Routines Pending", value: "2" },
-            { label: "Goals Active", value: "3/5" },
-            { label: "Streak", value: "10 Days" },
-          ].map((item, index) => (
-            <View
-              key={index}
-              className="flex-1 mx-1 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm"
-            >
-              <Text className="text-sm text-gray-600 dark:text-gray-400">
-                {item.label}
-              </Text>
-              <Text className="text-2xl font-bold text-gray-800 dark:text-gray-100">
-                {item.value}
-              </Text>
-            </View>
-          ))}
-        </View>
-
-        {/* Recent Activity */}
-        <View className="px-6 mt-6">
-          <Text className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-2">
-            Recent Activity
-          </Text>
-          {[
-            "Completed: Morning Walk (Habit)",
-            'Milestone Achieved: "Lose 1 kg"',
-          ].map((activity, index) => (
-            <Text
-              key={index}
-              className="text-sm text-gray-600 dark:text-gray-400 mb-1"
-            >
-              {activity}
-            </Text>
-          ))}
-        </View>
-
-        {/* Motivation */}
-        <View className="px-6 mt-6">
-          <Text className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-2">
-            🔥 Highlights
-          </Text>
-          <Text className="text-base font-semibold text-gray-800 dark:text-gray-100">
-            You're on a 10-day streak! Keep it going! 🔥
-          </Text>
-          <Text className="text-sm text-gray-600 dark:text-gray-400 mt-2 italic">
-            "Discipline is the bridge between goals and accomplishment." - Jim
-            Rohn
-          </Text>
-        </View>
-
-        {/* Navigation */}
-        <View className="px-6 mt-6 flex-row justify-around">
-          {[
-            { label: "Habits", icon: "checkmark-circle", link: "/habits" },
-            { label: "Routines", icon: "repeat", link: "/routines" },
-            { label: "Goals", icon: "flag", link: "/goals" },
-          ].map((navItem, index) => (
+            {
+              title: "Add Habit",
+              icon: "checkmark-done-outline",
+              route: "/add-habits",
+            },
+            {
+              title: "Add Routine",
+              icon: "calendar-outline",
+              route: "/add-routine",
+            },
+            {
+              title: "Add Goal",
+              icon: "trophy-outline",
+              route: "/add-goal",
+            },
+          ].map((action, index) => (
             <TouchableOpacity
               key={index}
-              onPress={() => router.push(navItem.link)}
-              className="items-center"
+              onPress={() => router.push(action.route)}
+              className="flex-1 items-center mx-2 bg-[#800020] py-6 rounded-lg shadow-lg"
             >
-              <Ionicons
-                name={navItem.icon}
-                size={32}
-                color="#800020"
-                className="mb-1"
-              />
-              <Text className="text-sm text-gray-800 dark:text-gray-100">
-                {navItem.label}
+              <Ionicons name={action.icon} size={32} color="white" />
+              <Text className="text-white text-center font-bold mt-2">
+                {action.title}
               </Text>
             </TouchableOpacity>
           ))}
         </View>
-      </ScrollView>
+      </View>
     </SafeAreaView>
   );
 }
