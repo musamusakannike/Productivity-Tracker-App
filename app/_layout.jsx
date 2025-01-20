@@ -40,10 +40,10 @@ export default function Layout() {
       activeRoutes: ["/goals", "/add-goal"] 
     },
     { 
-      name: "Profile", 
-      icon: "person-outline", 
-      route: "/profile", 
-      activeRoutes: ["/profile", "/profile/settings"] 
+      name: "Timer", 
+      icon: "stopwatch-outline", 
+      route: "/timer", 
+      activeRoutes: ["/timer", "/timer/settings"] 
     },
   ];
 
@@ -56,7 +56,7 @@ export default function Layout() {
       <View
         className={`py-4 px-6 ${
           isDarkMode ? "bg-gray-800" : "bg-gray-100"
-        } shadow-md`}
+        } ${pathname === "/welcome" || pathname==="/user-details" ? "hidden" : ""} shadow-md`}
       >
         <Text
           className={`text-xl font-extrabold ${
@@ -78,7 +78,7 @@ export default function Layout() {
           isDarkMode
             ? "bg-gray-800 border-t border-gray-700"
             : "bg-white border-t border-gray-300"
-        }`}
+        } ${pathname === "/welcome" || pathname==="/user-details" ? "hidden" : ""}`}
       >
         {tabs.map((tab, index) => {
           // Check if the current pathname matches the route or any activeRoutes
