@@ -1,5 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, Text, TouchableOpacity, TextInput, Alert, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  TextInput,
+  Alert,
+  ScrollView,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useColorScheme } from "react-native";
@@ -10,6 +17,7 @@ export default function TimerPage() {
   const isDarkMode = colorScheme === "dark";
 
   // State for Timer
+  const [activeTab, setActiveTab] = useState("Timer");
   const [title, setTitle] = useState("");
   const [hours, setHours] = useState(0);
   const [minutes, setMinutes] = useState(0);
@@ -64,19 +72,28 @@ export default function TimerPage() {
     const session = {
       title: title || "Untitled",
       duration: `${hours}h ${minutes}m ${seconds}s`,
-      startTime: new Date(Date.now() - (timeLeft + 1) * 1000).toLocaleTimeString(),
+      startTime: new Date(
+        Date.now() - (timeLeft + 1) * 1000
+      ).toLocaleTimeString(),
       endTime: new Date().toLocaleTimeString(),
     };
 
-    const storedSessions = (await AsyncStorage.getItem("timerSessions")) || "[]";
+    const storedSessions =
+      (await AsyncStorage.getItem("timerSessions")) || "[]";
     const updatedSessions = [...JSON.parse(storedSessions), session];
-    await AsyncStorage.setItem("timerSessions", JSON.stringify(updatedSessions));
+    await AsyncStorage.setItem(
+      "timerSessions",
+      JSON.stringify(updatedSessions)
+    );
   };
 
   // Start Timer
   const startTimer = () => {
     if (hours === 0 && minutes === 0 && seconds === 0) {
-      Alert.alert("Invalid Duration", "Please set a valid duration for the timer.");
+      Alert.alert(
+        "Invalid Duration",
+        "Please set a valid duration for the timer."
+      );
       return;
     }
 
@@ -92,12 +109,8 @@ export default function TimerPage() {
     setTimeLeft(0);
   };
 
-  // Start Stopwatch
-  const startStopwatch = () => {
-    setStopwatchRunning(true);
-  };
-
-  // Reset Stopwatch
+  const startStopwatch = () => setStopwatchRunning(true);
+  const pauseStopwatch = () => setStopwatchRunning(false);
   const resetStopwatch = () => {
     setStopwatchRunning(false);
     setStopwatchTime(0);
@@ -107,106 +120,163 @@ export default function TimerPage() {
     <SafeAreaView className={`flex-1 bg-gray-100 dark:bg-gray-900`}>
       {/* Tabs */}
       <View className="flex-row justify-around border-b border-gray-300 dark:border-gray-700">
-        <TouchableOpacity>
-          <Text className="text-lg font-bold text-gray-800 dark:text-gray-100 py-2">
+        <TouchableOpacity onPress={() => setActiveTab("Timer")}>
+          <Text
+            className={`text-lg font-bold py-2 ${
+              activeTab === "Timer"
+                ? "text-gray-800 dark:text-gray-100"
+                : "text-gray-400"
+            }`}
+          >
             Timer
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity>
-          <Text className="text-lg font-bold text-gray-800 dark:text-gray-100 py-2">
+        <TouchableOpacity onPress={() => setActiveTab("Stopwatch")}>
+          <Text
+            className={`text-lg font-bold py-2 ${
+              activeTab === "Stopwatch"
+                ? "text-gray-800 dark:text-gray-100"
+                : "text-gray-400"
+            }`}
+          >
             Stopwatch
           </Text>
         </TouchableOpacity>
       </View>
 
-      {/* Timer Section */}
-      <ScrollView contentContainerStyle={{ paddingBottom: 40 }} className="px-6">
-        {/* Title Input */}
-        <TextInput
-          placeholder="Session Title"
-          value={title}
-          onChangeText={setTitle}
-          className="bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 p-4 rounded-lg shadow-sm mt-4"
-        />
+      {activeTab === "Timer" && (
+        <ScrollView
+          contentContainerStyle={{ paddingBottom: 40 }}
+          className="px-6"
+        >
+          {/* Timer UI */}
+          {/* Title Input */}
+          <TextInput
+            placeholder="Session Title"
+            value={title}
+            onChangeText={setTitle}
+            className="bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 p-4 rounded-lg shadow-sm mt-4"
+          />
 
-        {/* Time Picker */}
-        <View className="flex-row justify-between mt-6">
-          <TextInput
-            placeholder="Hours"
-            keyboardType="number-pad"
-            value={hours.toString()}
-            onChangeText={(text) => setHours(parseInt(text) || 0)}
-            className="flex-1 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 p-4 rounded-lg shadow-sm mr-2"
-          />
-          <TextInput
-            placeholder="Minutes"
-            keyboardType="number-pad"
-            value={minutes.toString()}
-            onChangeText={(text) => setMinutes(parseInt(text) || 0)}
-            className="flex-1 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 p-4 rounded-lg shadow-sm mr-2"
-          />
-          <TextInput
-            placeholder="Seconds"
-            keyboardType="number-pad"
-            value={seconds.toString()}
-            onChangeText={(text) => setSeconds(parseInt(text) || 0)}
-            className="flex-1 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 p-4 rounded-lg shadow-sm"
-          />
-        </View>
+          {/* Time Picker */}
+          <View className="flex-row justify-between mt-6">
+            <TextInput
+              placeholder="Hours"
+              keyboardType="number-pad"
+              value={hours.toString()}
+              onChangeText={(text) => setHours(parseInt(text) || 0)}
+              className="flex-1 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 p-4 rounded-lg shadow-sm mr-2"
+            />
+            <TextInput
+              placeholder="Minutes"
+              keyboardType="number-pad"
+              value={minutes.toString()}
+              onChangeText={(text) => setMinutes(parseInt(text) || 0)}
+              className="flex-1 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 p-4 rounded-lg shadow-sm mr-2"
+            />
+            <TextInput
+              placeholder="Seconds"
+              keyboardType="number-pad"
+              value={seconds.toString()}
+              onChangeText={(text) => setSeconds(parseInt(text) || 0)}
+              className="flex-1 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 p-4 rounded-lg shadow-sm"
+            />
+          </View>
 
-        {/* Pomodoro Buttons */}
-        <View className="flex-row justify-between mt-4">
-          <TouchableOpacity
-            onPress={() => {
-              setHours(0);
-              setMinutes(25);
-              setSeconds(0);
-            }}
-            className="flex-1 bg-[#800020] py-3 rounded-lg mr-2"
-          >
-            <Text className="text-white font-bold text-center">Pomodoro</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {
-              setHours(0);
-              setMinutes(5);
-              setSeconds(0);
-            }}
-            className="flex-1 bg-gray-300 dark:bg-gray-700 py-3 rounded-lg"
-          >
-            <Text className="text-gray-800 dark:text-gray-100 font-bold text-center">
-              Rest
+          {/* Pomodoro Buttons */}
+          <View className="flex-row justify-between mt-4">
+            <TouchableOpacity
+              onPress={() => {
+                setHours(0);
+                setMinutes(25);
+                setSeconds(0);
+              }}
+              className="flex-1 bg-[#800020] py-3 rounded-lg mr-2"
+            >
+              <Text className="text-white font-bold text-center">Pomodoro</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                setHours(0);
+                setMinutes(5);
+                setSeconds(0);
+              }}
+              className="flex-1 bg-gray-300 dark:bg-gray-700 py-3 rounded-lg"
+            >
+              <Text className="text-gray-800 dark:text-gray-100 font-bold text-center">
+                Rest
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Timer Controls */}
+          <View className="flex-row justify-between mt-6">
+            <TouchableOpacity
+              onPress={startTimer}
+              className="flex-1 bg-green-500 py-3 rounded-lg mr-2"
+            >
+              <Text className="text-white font-bold text-center">Start</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={resetTimer}
+              className="flex-1 bg-red-500 py-3 rounded-lg"
+            >
+              <Text className="text-white font-bold text-center">Reset</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Timer Display */}
+          {timeLeft > 0 && (
+            <Text className="text-4xl font-bold text-center mt-6 text-gray-800 dark:text-gray-100">
+              {`${Math.floor(timeLeft / 3600)
+                .toString()
+                .padStart(2, "0")}:${Math.floor((timeLeft % 3600) / 60)
+                .toString()
+                .padStart(2, "0")}:${(timeLeft % 60)
+                .toString()
+                .padStart(2, "0")}`}
             </Text>
-          </TouchableOpacity>
-        </View>
+          )}
+        </ScrollView>
+      )}
 
-        {/* Timer Controls */}
-        <View className="flex-row justify-between mt-6">
-          <TouchableOpacity
-            onPress={startTimer}
-            className="flex-1 bg-green-500 py-3 rounded-lg mr-2"
-          >
-            <Text className="text-white font-bold text-center">Start</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={resetTimer}
-            className="flex-1 bg-red-500 py-3 rounded-lg"
-          >
-            <Text className="text-white font-bold text-center">Reset</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Timer Display */}
-        {timeLeft > 0 && (
+      {activeTab === "Stopwatch" && (
+        <ScrollView
+          contentContainerStyle={{ paddingBottom: 40 }}
+          className="px-6"
+        >
+          {/* Stopwatch UI */}
           <Text className="text-4xl font-bold text-center mt-6 text-gray-800 dark:text-gray-100">
-            {`${Math.floor(timeLeft / 3600)
+            {`${Math.floor(stopwatchTime / 3600)
               .toString()
-              .padStart(2, "0")}:${Math.floor((timeLeft % 3600) / 60)
+              .padStart(2, "0")}:${Math.floor((stopwatchTime % 3600) / 60)
               .toString()
-              .padStart(2, "0")}:${(timeLeft % 60).toString().padStart(2, "0")}`}
+              .padStart(2, "0")}:${(stopwatchTime % 60)
+              .toString()
+              .padStart(2, "0")}`}
           </Text>
-        )}
-      </ScrollView>
+          <View className="flex-row justify-between mt-6">
+            <TouchableOpacity
+              onPress={startStopwatch}
+              className="flex-1 bg-green-500 py-3 rounded-lg mr-2"
+            >
+              <Text className="text-white font-bold text-center">Start</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={pauseStopwatch}
+              className="flex-1 bg-yellow-500 py-3 rounded-lg mr-2"
+            >
+              <Text className="text-white font-bold text-center">Pause</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={resetStopwatch}
+              className="flex-1 bg-red-500 py-3 rounded-lg"
+            >
+              <Text className="text-white font-bold text-center">Reset</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      )}
     </SafeAreaView>
   );
 }
