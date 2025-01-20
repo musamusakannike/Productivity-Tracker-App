@@ -24,7 +24,6 @@ export default function Habits() {
     const fetchHabits = async () => {
       const storedHabits = await loadData("habits");
       setHabits(storedHabits || []);
-      console.log("Habits loaded: ", JSON.stringify(storedHabits));
     };
     fetchHabits();
   }, []);
@@ -233,6 +232,14 @@ export default function Habits() {
               <Text className="text-sm text-gray-500 dark:text-gray-400 text-center mt-2">
                 Try selecting a different date or add a new habit.
               </Text>
+              <TouchableOpacity
+                onPress={() => router.push("/add-habits")}
+                className="mt-6 bg-[#800020] py-3 px-4 rounded-lg"
+              >
+                <Text className="text-white font-bold text-center">
+                  Add Habit
+                </Text>
+              </TouchableOpacity>
             </View>
           )}
         </View>
