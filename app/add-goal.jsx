@@ -90,6 +90,7 @@ export default function AddGoal() {
         {/* Goal Name */}
         <TextInput
           placeholder="Goal Name"
+          placeholderTextColor="#aaa"
           value={name}
           onChangeText={setName}
           className="bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 p-4 rounded-lg shadow-sm mt-4"
@@ -98,6 +99,7 @@ export default function AddGoal() {
         {/* Goal Description */}
         <TextInput
           placeholder="Optional Description"
+          placeholderTextColor="#aaa"
           value={description}
           onChangeText={setDescription}
           multiline
@@ -140,7 +142,9 @@ export default function AddGoal() {
           onPress={() => setShowDatePicker(true)}
           className="bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 p-4 rounded-lg shadow-sm mt-4"
         >
-          <Text>Deadline: {deadline.toDateString()}</Text>
+          <Text className="dark:text-gray-400">
+            Deadline: {deadline.toDateString()}
+          </Text>
         </TouchableOpacity>
         {showDatePicker && (
           <DateTimePicker
@@ -161,6 +165,7 @@ export default function AddGoal() {
         <View className="flex-row items-center mt-2">
           <TextInput
             placeholder="Milestone Name"
+            placeholderTextColor="#aaa"
             value={milestoneInput}
             onChangeText={setMilestoneInput}
             className="flex-1 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 p-4 rounded-lg shadow-sm"
