@@ -216,6 +216,7 @@ export default function TimerPage() {
           {/* Title Input */}
           <TextInput
             placeholder="Session Title"
+            placeholderTextColor={"#aaa"}
             value={title}
             onChangeText={setTitle}
             className="bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 p-4 rounded-lg shadow-sm mt-4"
@@ -225,6 +226,7 @@ export default function TimerPage() {
           <View className="flex-row justify-between mt-6">
             <TextInput
               placeholder="Hours"
+              placeholderTextColor={"#aaa"}
               keyboardType="number-pad"
               value={hours.toString()}
               onChangeText={(text) => setHours(parseInt(text) || 0)}
@@ -232,6 +234,7 @@ export default function TimerPage() {
             />
             <TextInput
               placeholder="Minutes"
+              placeholderTextColor={"#aaa"}
               keyboardType="number-pad"
               value={minutes.toString()}
               onChangeText={(text) => setMinutes(parseInt(text) || 0)}
@@ -239,6 +242,7 @@ export default function TimerPage() {
             />
             <TextInput
               placeholder="Seconds"
+              placeholderTextColor={"#aaa"}
               keyboardType="number-pad"
               value={seconds.toString()}
               onChangeText={(text) => setSeconds(parseInt(text) || 0)}
