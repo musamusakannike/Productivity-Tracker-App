@@ -11,25 +11,27 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 
-import AppLogo from "../assets/images/logo.png";
-
 const slides = [
   {
-    image: AppLogo,
+title: "Continue..."
+  },
+  {
+    image: require("../assets/images/logo.png"), // Use require for local images
     title: "Welcome to My Life",
     description: "An app to help you build better habits, routines, and goals.",
   },
   {
-    image: "https://undraw.co/illustrations-fitness_stats",
+    image: require("../assets/images/build-better-habits.png"),
     title: "Build Better Habits",
     description: "Track and improve your daily habits effectively.",
   },
   {
-    image: "https://undraw.co/illustrations-goals",
+    image: require("../assets/images/goals.png"),
     title: "Stay Motivated",
     description: "Achieve your goals and unlock your potential.",
   },
 ];
+
 
 export default function Welcome() {
   const router = useRouter();
@@ -90,10 +92,7 @@ export default function Welcome() {
         style={[styles.slideContainer, { opacity: fadeAnim }]}
         {...panResponder.panHandlers}
       >
-        <Image
-          source={slides[currentIndex].image}
-          style={styles.slideImage}
-        />
+        <Image source={slides[currentIndex].image} style={styles.slideImage} />
         <Text style={styles.slideTitle}>{slides[currentIndex].title}</Text>
         <Text style={styles.slideDescription}>
           {slides[currentIndex].description}
