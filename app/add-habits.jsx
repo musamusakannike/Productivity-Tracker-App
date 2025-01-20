@@ -122,7 +122,7 @@ export default function AddHabit() {
                   : "bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100"
               }`}
             >
-              <Text className={`font-bold text-center ${frequency === freq ? "text-gray-300 dark:text-gray-100" : "text-gray-800 dark:text-gray-400"}`}>{freq}</Text>
+              <Text className={`font-bold text-center ${frequency === freq ? "text-gray-300 dark:text-gray-100" : "text-gray-600 dark:text-gray-400"}`}>{freq}</Text>
             </TouchableOpacity>
           ))}
         </View>
