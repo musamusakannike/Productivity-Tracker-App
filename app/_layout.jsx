@@ -31,7 +31,7 @@ export default function Layout() {
       name: "Routines", 
       icon: "calendar-outline", 
       route: "/routines", 
-      activeRoutes: ["/routines", "/routines/schedule"] 
+      activeRoutes: ["/routines", "/add-routine"] 
     },
     { 
       name: "Goals", 
