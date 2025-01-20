@@ -16,6 +16,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // AsyncStorage.clear()
     const checkAccount = async () => {
       const account = await AsyncStorage.getItem("userAccount");
       console.log("Account", account);
