@@ -24,6 +24,7 @@ export default function Habits() {
     const fetchHabits = async () => {
       const storedHabits = await loadData("habits");
       setHabits(storedHabits || []);
+      console.log("Habits: ", storedHabits);
     };
     fetchHabits();
   }, []);
@@ -36,15 +37,25 @@ export default function Habits() {
   );
 
   // Calculate accuracy for a habit
-  const calculateAccuracy = (history) => {
-    if (!history || Object.keys(history).length === 0) return 0; // Handle empty or undefined history.
+  const calculateAccuracy = (habit) => {
+    const { startDate, history } = habit;
+    if (!startDate) return 0;
 
-    const totalDays = Object.keys(history).length; // Total days in history.
-    const completedDays = Object.values(history).filter(
-      (status) => status === true
-    ).length; // Count of completed days.
+    // Get today's date and the start date
+    const start = new Date(startDate);
+    const today = new Date();
 
-    return Math.round((completedDays / totalDays) * 100); // Calculate accuracy as a percentage.
+    // Calculate total days since the start date
+    const totalDays = Math.max(
+      Math.ceil((today - start) / (1000 * 60 * 60 * 24)),
+      1 // Ensure at least 1 day
+    );
+
+    // Count completed days
+    const completedDays = Object.values(history || {}).filter(Boolean).length;
+
+    // Calculate accuracy percentage
+    return Math.round((completedDays / totalDays) * 100);
   };
 
   const toggleCompletion = async (habitId) => {
@@ -213,7 +224,7 @@ export default function Habits() {
 
                 {/* Accuracy */}
                 <Text className="text-sm font-semibold text-gray-600 dark:text-gray-400 mt-2">
-                  Accuracy: {calculateAccuracy(habit.history)}%
+                  Accuracy: {calculateAccuracy(habit)}%
                 </Text>
               </View>
             ))
