@@ -96,7 +96,7 @@ export default function Layout() {
 
   return (
     <SafeAreaView className={`flex-1 h-[100%] bg-gray-50 dark:bg-gray-900`}>
-      <StatusBar />
+      <StatusBar animated />
       {/* Sidebar */}
       <Animated.View
         style={[
