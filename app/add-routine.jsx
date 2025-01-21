@@ -42,7 +42,7 @@ export default function AddRoutine() {
     const updatedRoutines = [...existingRoutines, newRoutine];
     await saveData("routines", updatedRoutines);
 
-    router.push("/routines");
+    router.replace("/routines");
   };
 
   return (
@@ -54,6 +54,7 @@ export default function AddRoutine() {
       {/* Routine Name */}
       <TextInput
         placeholder="Routine Name"
+        placeholderTextColor={"#aaa"}
         value={name}
         onChangeText={setName}
         className="bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 p-4 rounded-lg shadow-sm mt-4"
@@ -62,6 +63,7 @@ export default function AddRoutine() {
       {/* Routine Description */}
       <TextInput
         placeholder="Optional Description"
+        placeholderTextColor={"#aaa"}
         value={description}
         onChangeText={setDescription}
         multiline
@@ -75,6 +77,7 @@ export default function AddRoutine() {
       <View className="flex-row items-center mt-2">
         <TextInput
           placeholder="Task Name"
+          placeholderTextColor={"#aaa"}
           value={taskInput}
           onChangeText={setTaskInput}
           className="flex-1 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 p-4 rounded-lg shadow-sm"
