@@ -1,36 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
-  FlatList,
   ScrollView,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Ionicons } from "@expo/vector-icons"; // Import Ionicons
 import { saveData, loadData } from "../utils/storage";
 
-const categories = [
-  { name: "Health", icon: "fitness-outline", color: "#4CAF50" },
-  { name: "Work", icon: "briefcase-outline", color: "#2196F3" },
-  { name: "Personal", icon: "person-outline", color: "#FFC107" },
-  { name: "Hobby", icon: "brush-outline", color: "#9C27B0" },
-  { name: "Quit a Bad Habit", icon: "ban-outline", color: "#E53935" },
-  { name: "Art", icon: "color-palette-outline", color: "#673AB7" },
-  { name: "Meditation", icon: "flower-outline", color: "#00ACC1" },
-  { name: "Study", icon: "school-outline", color: "#3F51B5" },
-  { name: "Entertainment", icon: "musical-notes-outline", color: "#F44336" },
-  { name: "Sports", icon: "football-outline", color: "#4CAF50" },
-  { name: "Social", icon: "people-outline", color: "#03A9F4" },
-  { name: "Nutrition", icon: "nutrition-outline", color: "#FF9800" },
-  { name: "Finance", icon: "wallet-outline", color: "#795548" },
-  { name: "Other", icon: "ellipsis-horizontal-outline", color: "#9E9E9E" },
-];
-
 export default function AddGoal() {
+  const [categories, setCategories] = useState([]);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -38,8 +20,28 @@ export default function AddGoal() {
   const [milestoneInput, setMilestoneInput] = useState("");
   const [deadline, setDeadline] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const router = useRouter();
 
+  // Fetch categories from AsyncStorage
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const storedCategories = await loadData("categories");
+      if (storedCategories && storedCategories.length > 0) {
+        setCategories(storedCategories);
+      } else {
+        const defaultCategories = [
+          { name: "Health", icon: "fitness-outline", color: "#4CAF50" },
+          { name: "Work", icon: "briefcase-outline", color: "#2196F3" },
+          { name: "Personal", icon: "person-outline", color: "#FFC107" },
+          // Add more categories here
+        ];
+        setCategories(defaultCategories);
+        await saveData("categories", defaultCategories);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  // Add a milestone to the list
   const handleAddMilestone = () => {
     if (milestoneInput.trim()) {
       setMilestones([
@@ -50,12 +52,14 @@ export default function AddGoal() {
     }
   };
 
+  // Delete a milestone from the list
   const handleDeleteMilestone = (milestoneId) => {
     setMilestones(
       milestones.filter((milestone) => milestone.id !== milestoneId)
     );
   };
 
+  // Save the goal to AsyncStorage
   const handleSaveGoal = async () => {
     if (!name || !selectedCategory || milestones.length === 0) {
       alert("Please fill all required fields and add at least one milestone.");
@@ -77,7 +81,7 @@ export default function AddGoal() {
     const updatedGoals = [...existingGoals, newGoal];
     await saveData("goals", updatedGoals);
 
-    router.push("/goals");
+    alert("Goal added successfully!");
   };
 
   return (
