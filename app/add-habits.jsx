@@ -74,7 +74,7 @@ export default function AddHabit() {
     const updatedHabits = [...existingHabits, newHabit];
     await saveData("habits", updatedHabits);
 
-    router.push("/habits");
+    router.replace("/habits");
   };
 
   return (
