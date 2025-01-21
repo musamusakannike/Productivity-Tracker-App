@@ -24,7 +24,6 @@ export default function Habits() {
     const fetchHabits = async () => {
       const storedHabits = await loadData("habits");
       setHabits(storedHabits || []);
-      console.log("Habits: ", storedHabits);
     };
     fetchHabits();
   }, []);
