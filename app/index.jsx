@@ -18,7 +18,6 @@ export default function Home() {
   useEffect(() => {
     const checkAccount = async () => {
       const account = await AsyncStorage.getItem("userAccount");
-      console.log("Account", account);
       if (!account) {
         setLoading(false);
         router.replace("/welcome"); // Redirect to the welcome page
