@@ -81,7 +81,7 @@ export default function Layout() {
     { name: "Home", icon: "home-outline", route: "/" },
     { name: "Settings", icon: "settings-outline", route: "/settings" },
     { name: "Categories", icon: "grid-outline", route: "/categories" },
-    { name: "Backup", icon: "cloud-upload-outline", route: "/backup" },
+    { name: "Help", icon: "help-outline", route: "/help" },
   ];
 
   const getCurrentDate = () => {
