@@ -15,6 +15,7 @@ import { Stack, useRouter, usePathname } from "expo-router";
 
 // Get screen width for slide animation
 const SCREEN_WIDTH = Dimensions.get("window").width;
+const SCREEN_HEIGHT = Dimensions.get("window").height;
 
 export default function Layout() {
   const router = useRouter();
@@ -31,8 +32,8 @@ export default function Layout() {
     const fetchUserName = async () => {
       const account = await AsyncStorage.getItem("userAccount");
       if (account) {
-        const { name } = JSON.parse(account);
-        setUserName(name || "User");
+        const { userName } = JSON.parse(account);
+        setUserName(userName || "User");
       }
     };
     fetchUserName();
@@ -109,7 +110,7 @@ export default function Layout() {
         <View style={styles.sidebarHeader}>
           <Image
             source={{
-              uri: "https://i.pravatar.cc/150?img=5", // Replace with user's avatar if available
+              uri: "https://i.pravatar.cc/150?img=2", // Replace with user's avatar if available
             }}
             style={styles.avatar}
           />
@@ -246,11 +247,11 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 0,
     left: 0,
-    height: "100%",
+    height: SCREEN_HEIGHT,
     width: SCREEN_WIDTH * 0.8,
     backgroundColor: "#800020",
     padding: 20,
-    zIndex: 10,
+    zIndex: 1000,
     elevation: 5,
     shadowColor: "#000",
     shadowOpacity: 0.3,
