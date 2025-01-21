@@ -10,6 +10,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Ionicons } from "@expo/vector-icons"; // Import Ionicons
 import { saveData, loadData } from "../utils/storage";
+import { useRouter } from "expo-router";
 
 export default function AddGoal() {
   const [categories, setCategories] = useState([]);
@@ -20,6 +21,7 @@ export default function AddGoal() {
   const [milestoneInput, setMilestoneInput] = useState("");
   const [deadline, setDeadline] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const router = useRouter();
 
   // Fetch categories from AsyncStorage
   useEffect(() => {
@@ -82,6 +84,7 @@ export default function AddGoal() {
     await saveData("goals", updatedGoals);
 
     alert("Goal added successfully!");
+    router.replace("/goals");
   };
 
   return (
