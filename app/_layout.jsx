@@ -109,9 +109,7 @@ export default function Layout() {
         {/* Header */}
         <View style={styles.sidebarHeader}>
           <Image
-            source={{
-              uri: "https://i.pravatar.cc/150?img=2", // Replace with user's avatar if available
-            }}
+            source={require("../assets/images/user.png")}
             style={styles.avatar}
           />
           <Text style={styles.userName}>{userName}</Text>
@@ -256,10 +254,11 @@ const styles = StyleSheet.create({
     shadowColor: "#000",
     shadowOpacity: 0.3,
     shadowRadius: 10,
+    paddingTop: 60,
   },
   sidebarHeader: {
     alignItems: "center",
-    marginBottom: 20,
+    marginBottom: 30,
   },
   avatar: {
     width: 70,
