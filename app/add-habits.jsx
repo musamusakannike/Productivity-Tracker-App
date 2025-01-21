@@ -1,34 +1,56 @@
-import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, FlatList, ScrollView } from "react-native";
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  FlatList,
+  ScrollView,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { saveData, loadData } from "../utils/storage";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
-const categories = [
+const inBuiltCategories = [
   { name: "Health", icon: "fitness-outline", color: "#4CAF50" },
   { name: "Work", icon: "briefcase-outline", color: "#2196F3" },
   { name: "Personal", icon: "person-outline", color: "#FFC107" },
   { name: "Hobby", icon: "brush-outline", color: "#9C27B0" },
-  { name: "Quit a Bad Habit", icon: "ban-outline", color: "#E53935" }, // Red for quitting bad habits
-  { name: "Art", icon: "color-palette-outline", color: "#673AB7" }, // Purple for creativity
-  { name: "Meditation", icon: "flower-outline", color: "#00ACC1" }, // Calm blue-green
-  { name: "Study", icon: "school-outline", color: "#3F51B5" }, // Blue for education
-  { name: "Entertainment", icon: "musical-notes-outline", color: "#F44336" }, // Red for fun and vibrancy
-  { name: "Sports", icon: "football-outline", color: "#4CAF50" }, // Green for activity
-  { name: "Social", icon: "people-outline", color: "#03A9F4" }, // Light blue for connections
-  { name: "Nutrition", icon: "nutrition-outline", color: "#FF9800" }, // Orange for food
-  { name: "Finance", icon: "wallet-outline", color: "#795548" }, // Brown for money management
-  { name: "Other", icon: "ellipsis-horizontal-outline", color: "#9E9E9E" }, // Neutral grey
+  { name: "Quit a Bad Habit", icon: "ban-outline", color: "#E53935" },
+  { name: "Art", icon: "color-palette-outline", color: "#673AB7" },
+  { name: "Meditation", icon: "flower-outline", color: "#00ACC1" },
+  { name: "Study", icon: "school-outline", color: "#3F51B5" },
+  { name: "Entertainment", icon: "musical-notes-outline", color: "#F44336" },
+  { name: "Sports", icon: "football-outline", color: "#4CAF50" },
+  { name: "Social", icon: "people-outline", color: "#03A9F4" },
+  { name: "Nutrition", icon: "nutrition-outline", color: "#FF9800" },
+  { name: "Finance", icon: "wallet-outline", color: "#795548" },
+  { name: "Other", icon: "ellipsis-horizontal-outline", color: "#9E9E9E" },
 ];
 
-
 export default function AddHabit() {
+  const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [frequency, setFrequency] = useState("Daily");
   const router = useRouter();
+
+  // Fetch categories from AsyncStorage
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const storedCategories = await loadData("categories");
+      if (storedCategories && storedCategories.length > 0) {
+        setCategories(storedCategories);
+      } else {
+        // Save in-built categories to AsyncStorage if none exist
+        setCategories(inBuiltCategories);
+        await saveData("categories", inBuiltCategories);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   const handleAddHabit = async () => {
     if (!name || !selectedCategory) {
@@ -57,7 +79,10 @@ export default function AddHabit() {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-100 dark:bg-gray-900">
-      <ScrollView className="px-6" contentContainerStyle={{ paddingBottom: 20 }}>
+      <ScrollView
+        className="px-6"
+        contentContainerStyle={{ paddingBottom: 20 }}
+      >
         <Text className="text-lg font-bold text-gray-800 dark:text-gray-100 mt-6 mb-4">
           Add a New Habit
         </Text>
@@ -122,7 +147,15 @@ export default function AddHabit() {
                   : "bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100"
               }`}
             >
-              <Text className={`font-bold text-center ${frequency === freq ? "text-gray-300 dark:text-gray-100" : "text-gray-600 dark:text-gray-400"}`}>{freq}</Text>
+              <Text
+                className={`font-bold text-center ${
+                  frequency === freq
+                    ? "text-gray-300 dark:text-gray-100"
+                    : "text-gray-600 dark:text-gray-400"
+                }`}
+              >
+                {freq}
+              </Text>
             </TouchableOpacity>
           ))}
         </View>
