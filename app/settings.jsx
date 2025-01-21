@@ -9,11 +9,13 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useColorScheme } from "nativewind";
+import { useRouter } from "expo-router";
 
 export default function Settings() {
   const [userName, setUserName] = useState("");
   const [userAge, setUserAge] = useState("");
   const [editMode, setEditMode] = useState(false);
+  const router = useRouter();
   const { colorScheme, setColorScheme } = useColorScheme(); // NativeWind hook
 
   useEffect(() => {
@@ -56,6 +58,7 @@ export default function Settings() {
         onPress: async () => {
           await AsyncStorage.clear();
           Alert.alert("Success", "App memory cleared.");
+          router.push("/")
         },
       },
     ]);
@@ -93,12 +96,14 @@ export default function Settings() {
               value={userName}
               onChangeText={setUserName}
               placeholder="Enter your name"
+              placeholderTextColor={"#aaa"}
               className="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 p-3 rounded-lg mb-4"
             />
             <TextInput
               value={userAge}
               onChangeText={setUserAge}
               placeholder="Enter your age (optional)"
+              placeholderTextColor={"#aaa"}
               keyboardType="number-pad"
               className="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 p-3 rounded-lg mb-4"
             />
