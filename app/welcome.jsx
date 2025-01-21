@@ -13,10 +13,10 @@ import { useRouter } from "expo-router";
 
 const slides = [
   {
-title: "Continue..."
+    title: "Continue...",
   },
   {
-    image: require("../assets/images/logo.png"), // Use require for local images
+    image: require("../assets/images/logo.png"),
     title: "Welcome to My Life",
     description: "An app to help you build better habits, routines, and goals.",
   },
@@ -31,7 +31,6 @@ title: "Continue..."
     description: "Achieve your goals and unlock your potential.",
   },
 ];
-
 
 export default function Welcome() {
   const router = useRouter();
