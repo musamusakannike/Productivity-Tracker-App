@@ -35,21 +35,22 @@ export default function AddNotes() {
       alert("Note body is required.");
       return;
     }
-
+  
     const newNote = {
       id: noteId || Date.now().toString(),
       heading: heading.trim(),
       body: body.trim(),
+      date: noteId ? new Date().toISOString() : Date.now(), // Add note date
     };
-
+  
     const existingNotes = await loadData("notes");
     const updatedNotes = noteId
       ? existingNotes.map((n) => (n.id === noteId ? newNote : n))
       : [...existingNotes, newNote];
-
+  
     await saveData("notes", updatedNotes);
     router.push("/notes");
-  };
+  };  
 
   return (
     <SafeAreaView className="flex-1 bg-gray-100 dark:bg-gray-900 px-6">

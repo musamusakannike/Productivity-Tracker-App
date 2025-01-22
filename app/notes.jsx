@@ -1,11 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-} from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -59,9 +53,13 @@ export default function Notes() {
               <Text className="text-gray-600 dark:text-gray-400 mb-2">
                 {note.body}
               </Text>
+              <Text className="text-gray-400 dark:text-gray-500 text-sm">
+                {new Date(note.date).toLocaleDateString()}{" "}
+                {/* Display note date */}
+              </Text>
 
               {/* Actions */}
-              <View className="flex-row justify-end gap-x-2 space-x-4">
+              <View className="flex-row justify-end gap-x-2 space-x-4 mt-2">
                 <TouchableOpacity
                   onPress={() =>
                     router.push({
