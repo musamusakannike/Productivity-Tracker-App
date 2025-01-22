@@ -11,22 +11,21 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 
+// Modified slides to ensure proper image handling
 const slides = [
   {
-    title: "Continue...",
-  },
-  {
-    image: require("../assets/images/logo.png"),
+    // Using require for local images or a direct URL for remote images
+    imageSource: require("../assets/images/logo.png"), // Make sure this path is correct
     title: "Welcome to My Life",
     description: "An app to help you build better habits, routines, and goals.",
   },
   {
-    image: require("../assets/images/build-better-habits.png"),
+    imageSource: require("../assets/images/build-better-habits.png"),
     title: "Build Better Habits",
     description: "Track and improve your daily habits effectively.",
   },
   {
-    image: require("../assets/images/goals.png"),
+    imageSource: require("../assets/images/goals.png"),
     title: "Stay Motivated",
     description: "Achieve your goals and unlock your potential.",
   },
@@ -35,13 +34,12 @@ const slides = [
 export default function Welcome() {
   const router = useRouter();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const fadeAnim = useRef(new Animated.Value(1)).current; // Start with 1 for initial visibility
 
-  // Swipe Gesture Handling
   const panResponder = useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: (evt, gestureState) =>
-        Math.abs(gestureState.dx) > 10, // Trigger swipe for horizontal movement
+        Math.abs(gestureState.dx) > 10,
       onPanResponderRelease: (evt, gestureState) => {
         if (gestureState.dx < -50 && currentIndex < slides.length - 1) {
           handleNext();
@@ -54,25 +52,37 @@ export default function Welcome() {
 
   const handleNext = () => {
     if (currentIndex < slides.length - 1) {
+      Animated.sequence([
+        Animated.timing(fadeAnim, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start();
       setCurrentIndex(currentIndex + 1);
-      fadeAnim.setValue(0);
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 500,
-        useNativeDriver: true,
-      }).start();
     }
   };
 
   const handlePrevious = () => {
     if (currentIndex > 0) {
+      Animated.sequence([
+        Animated.timing(fadeAnim, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start();
       setCurrentIndex(currentIndex - 1);
-      fadeAnim.setValue(0);
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 500,
-        useNativeDriver: true,
-      }).start();
     }
   };
 
@@ -91,7 +101,12 @@ export default function Welcome() {
         style={[styles.slideContainer, { opacity: fadeAnim }]}
         {...panResponder.panHandlers}
       >
-        <Image source={slides[currentIndex].image} style={styles.slideImage} />
+        <Image
+          source={slides[currentIndex].imageSource}
+          style={styles.slideImage}
+          // Add error handling for image loading
+          onError={(error) => console.log("Image loading error:", error)}
+        />
         <Text style={styles.slideTitle}>{slides[currentIndex].title}</Text>
         <Text style={styles.slideDescription}>
           {slides[currentIndex].description}
