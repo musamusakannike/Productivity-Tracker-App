@@ -105,7 +105,7 @@ export default function Layout() {
       name: "Timer",
       icon: "stopwatch-outline",
       route: "/timer",
-      activeRoutes: ["/timer", "/timer/settings"],
+      activeRoutes: ["/timer"],
     },
   ];
 
@@ -113,6 +113,7 @@ export default function Layout() {
     { name: "Home", icon: "home-outline", route: "/" },
     { name: "Settings", icon: "settings-outline", route: "/settings" },
     { name: "Categories", icon: "grid-outline", route: "/categories" },
+    { name: "Notes", icon: "book-outline", route: "/notes" },
     { name: "Help", icon: "help-outline", route: "/help" },
   ];
 
