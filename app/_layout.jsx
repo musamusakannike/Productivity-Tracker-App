@@ -5,50 +5,82 @@ import {
   Text,
   TouchableOpacity,
   Dimensions,
+  Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useColorScheme, StyleSheet, Image } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import "../global.css";
 import { StatusBar } from "expo-status-bar";
 import { Stack, useRouter, usePathname } from "expo-router";
 
-// Get screen width for slide animation
-const SCREEN_WIDTH = Dimensions.get("window").width;
-const SCREEN_HEIGHT = Dimensions.get("window").height;
+// Get screen dimensions and adjust for notch/status bar
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
+const STATUS_BAR_HEIGHT = Platform.OS === 'ios' ? 20 : StatusBar.currentHeight || 0;
 
 export default function Layout() {
   const router = useRouter();
   const pathname = usePathname();
-  const colorScheme = useColorScheme(); // Detect light or dark mode
+  const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === "dark";
   const [userName, setUserName] = useState("User");
+  const [sidebarHeight, setSidebarHeight] = useState(SCREEN_HEIGHT);
 
   // Sidebar animation and state
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const sidebarOffset = useState(new Animated.Value(-SCREEN_WIDTH))[0];
 
+  // Effect to get actual screen height
   useEffect(() => {
-    const fetchUserName = async () => {
-      const account = await AsyncStorage.getItem("userAccount");
-      if (account) {
-        const { userName } = JSON.parse(account);
-        setUserName(userName || "User");
+    const updateSidebarHeight = () => {
+      const height = Dimensions.get('window').height;
+      setSidebarHeight(height);
+    };
+
+    // Listen for dimension changes
+    Dimensions.addEventListener('change', updateSidebarHeight);
+    updateSidebarHeight();
+
+    // Cleanup
+    return () => {
+      // For newer React Native versions, the cleanup is automatic
+      if (Dimensions.removeEventListener) {
+        Dimensions.removeEventListener('change', updateSidebarHeight);
       }
     };
+  }, []);
+
+  // Effect to fetch user name
+  useEffect(() => {
+    const fetchUserName = async () => {
+      try {
+        const account = await AsyncStorage.getItem("userAccount");
+        if (account) {
+          const { name } = JSON.parse(account);
+          if (name) {
+            setUserName(name);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching user name:", error);
+      }
+    };
+
     fetchUserName();
   }, []);
 
-  // Toggle sidebar visibility
+  // Toggle sidebar visibility with improved animation
   const toggleSidebar = () => {
     Animated.timing(sidebarOffset, {
       toValue: isSidebarOpen ? -SCREEN_WIDTH : 0,
       duration: 300,
-      useNativeDriver: false,
+      useNativeDriver: true,
     }).start();
     setSidebarOpen(!isSidebarOpen);
   };
 
+  // Rest of your existing code remains the same until the styles...
   const tabs = [
     { name: "Home", icon: "home-outline", route: "/", activeRoutes: ["/"] },
     {
@@ -84,24 +116,15 @@ export default function Layout() {
     { name: "Help", icon: "help-outline", route: "/help" },
   ];
 
-  const getCurrentDate = () => {
-    const options = {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    };
-    return new Date().toLocaleDateString(undefined, options);
-  };
-
   return (
     <SafeAreaView className={`flex-1 h-[100%] bg-gray-50 dark:bg-gray-900`}>
       <StatusBar animated />
-      {/* Sidebar */}
+      {/* Sidebar with dynamic height */}
       <Animated.View
         style={[
           styles.sidebar,
           {
+            height: sidebarHeight,
             transform: [{ translateX: sidebarOffset }],
           },
         ]}
@@ -146,18 +169,11 @@ export default function Layout() {
         </View>
       </Animated.View>
 
-      {/* Overlay for closing sidebar */}
+      {/* Rest of your layout components... */}
+      {/* Overlay */}
       {isSidebarOpen && (
         <TouchableOpacity
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            height: "100%",
-            width: "100%",
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            zIndex: 5,
-          }}
+          style={[styles.overlay, { height: sidebarHeight }]}
           onPress={toggleSidebar}
         />
       )}
@@ -245,7 +261,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 0,
     left: 0,
-    height: SCREEN_HEIGHT,
     width: SCREEN_WIDTH * 0.8,
     backgroundColor: "#800020",
     padding: 20,
@@ -254,7 +269,15 @@ const styles = StyleSheet.create({
     shadowColor: "#000",
     shadowOpacity: 0.3,
     shadowRadius: 10,
-    paddingTop: 60,
+    paddingTop: Platform.OS === 'ios' ? 60 : STATUS_BAR_HEIGHT + 20,
+  },
+  overlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "100%",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    zIndex: 5,
   },
   sidebarHeader: {
     alignItems: "center",
@@ -295,35 +318,11 @@ const styles = StyleSheet.create({
   sidebarFooter: {
     alignItems: "center",
     marginTop: 20,
+    marginBottom: 20,
   },
   footerText: {
     fontSize: 12,
     color: "#ffffff",
     opacity: 0.8,
-  },
-  overlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    width: "100%",
-    height: "100%",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    zIndex: 5,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: 15,
-    backgroundColor: "#f9f9f9",
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 2,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#808080",
   },
 });
