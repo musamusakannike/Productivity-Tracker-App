@@ -6,11 +6,12 @@ import {
   TextInput,
   Alert,
   ScrollView,
+  StyleSheet,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Ionicons from "@expo/vector-icons/Ionicons";
 import { useColorScheme } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Picker } from "@react-native-picker/picker";
 
 export default function TimerPage() {
   const colorScheme = useColorScheme();
@@ -121,7 +122,9 @@ export default function TimerPage() {
   useEffect(() => {
     const fetchSessions = async () => {
       const storedSessions = await AsyncStorage.getItem("timerSessions");
-      setSessions(JSON.parse(storedSessions) || []);
+      const fetchedSessions = JSON.parse(storedSessions) || [];
+      const sortedSessions = [...fetchedSessions].reverse();
+      setSessions(sortedSessions);
     };
     fetchSessions();
   }, []);
@@ -208,102 +211,153 @@ export default function TimerPage() {
       </View>
 
       {activeTab === "Timer" && (
-        <ScrollView
-          contentContainerStyle={{ paddingBottom: 40 }}
-          className="px-6"
-        >
+        <ScrollView className="flex-1 px-6 py-4 bg-gray-100 dark:bg-gray-900">
           {/* Timer UI */}
-          {/* Title Input */}
-          <TextInput
-            placeholder="Session Title"
-            placeholderTextColor={"#aaa"}
-            value={title}
-            onChangeText={setTitle}
-            className="bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 p-4 rounded-lg shadow-sm mt-4"
-          />
-
-          {/* Time Picker */}
-          <View className="flex-row justify-between mt-6">
-            <TextInput
-              placeholder="Hours"
-              placeholderTextColor={"#aaa"}
-              keyboardType="number-pad"
-              value={hours.toString()}
-              onChangeText={(text) => setHours(parseInt(text) || 0)}
-              className="flex-1 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 p-4 rounded-lg shadow-sm mr-2"
-            />
-            <TextInput
-              placeholder="Minutes"
-              placeholderTextColor={"#aaa"}
-              keyboardType="number-pad"
-              value={minutes.toString()}
-              onChangeText={(text) => setMinutes(parseInt(text) || 0)}
-              className="flex-1 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 p-4 rounded-lg shadow-sm mr-2"
-            />
-            <TextInput
-              placeholder="Seconds"
-              placeholderTextColor={"#aaa"}
-              keyboardType="number-pad"
-              value={seconds.toString()}
-              onChangeText={(text) => setSeconds(parseInt(text) || 0)}
-              className="flex-1 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 p-4 rounded-lg shadow-sm"
-            />
-          </View>
-
-          {/* Pomodoro Buttons */}
-          <View className="flex-row justify-between mt-4">
-            <TouchableOpacity
-              onPress={() => {
-                setHours(0);
-                setMinutes(25);
-                setSeconds(0);
-              }}
-              className="flex-1 bg-[#800020] py-3 rounded-lg mr-2"
-            >
-              <Text className="text-white font-bold text-center">Pomodoro</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => {
-                setHours(0);
-                setMinutes(5);
-                setSeconds(0);
-              }}
-              className="flex-1 bg-gray-300 dark:bg-gray-700 py-3 rounded-lg"
-            >
-              <Text className="text-gray-800 dark:text-gray-100 font-bold text-center">
-                Rest
+          <View className="mt-6">
+            {/* Timer Display */}
+            {timeLeft > 0 && (
+              <Text className="text-4xl font-bold text-center mb-6 text-gray-800 dark:text-gray-100">
+                {`${Math.floor(timeLeft / 3600)
+                  .toString()
+                  .padStart(2, "0")}:${Math.floor((timeLeft % 3600) / 60)
+                  .toString()
+                  .padStart(2, "0")}:${(timeLeft % 60)
+                  .toString()
+                  .padStart(2, "0")}`}
               </Text>
-            </TouchableOpacity>
-          </View>
+            )}
+            
+            {/* Title Input */}
+            <TextInput
+              placeholder="Session Title"
+              placeholderTextColor="#aaa"
+              value={title}
+              onChangeText={setTitle}
+              className={`p-4 rounded-lg shadow-sm ${
+                title === ""
+                  ? "border border-red-500"
+                  : "border border-transparent"
+              } bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100`}
+            />
 
-          {/* Timer Controls */}
-          <View className="flex-row justify-between mt-6">
-            <TouchableOpacity
-              onPress={startTimer}
-              className="flex-1 bg-green-500 py-3 rounded-lg mr-2"
+            {/* Time Pickers */}
+            <View
+              contentContainerStyle={{ paddingBottom: 40 }}
+              className="flex-row justify-between items-center mt-6"
             >
-              <Text className="text-white font-bold text-center">Start</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={resetTimer}
-              className="flex-1 bg-red-500 py-3 rounded-lg"
-            >
-              <Text className="text-white font-bold text-center">Reset</Text>
-            </TouchableOpacity>
-          </View>
+              {/* Hours Picker */}
+              <View className="flex-1 mx-1">
+                <Picker
+                  selectedValue={hours.toString()}
+                  onValueChange={(itemValue) =>
+                    setHours(parseInt(itemValue, 10))
+                  }
+                  style={{
+                    backgroundColor: isDarkMode ? "#374151" : "#eee",
+                    borderRadius: 10,
+                    color: isDarkMode ? "#fff" : "#000",
+                  }}
+                >
+                  {Array.from({ length: 24 }, (_, i) => (
+                    <Picker.Item
+                      key={i}
+                      label={i.toString()}
+                      value={i.toString()}
+                    />
+                  ))}
+                </Picker>
+              </View>
 
-          {/* Timer Display */}
-          {timeLeft > 0 && (
-            <Text className="text-4xl font-bold text-center mt-6 text-gray-800 dark:text-gray-100">
-              {`${Math.floor(timeLeft / 3600)
-                .toString()
-                .padStart(2, "0")}:${Math.floor((timeLeft % 3600) / 60)
-                .toString()
-                .padStart(2, "0")}:${(timeLeft % 60)
-                .toString()
-                .padStart(2, "0")}`}
-            </Text>
-          )}
+              {/* Minutes Picker */}
+              <View className="flex-1 mx-1">
+                <Picker
+                  selectedValue={minutes.toString()}
+                  onValueChange={(itemValue) =>
+                    setMinutes(parseInt(itemValue, 10))
+                  }
+                  style={{
+                    backgroundColor: isDarkMode ? "#374151" : "#eee",
+                    borderRadius: 10,
+                    color: isDarkMode ? "#fff" : "#000",
+                  }}
+                >
+                  {Array.from({ length: 60 }, (_, i) => (
+                    <Picker.Item
+                      key={i}
+                      label={i.toString()}
+                      value={i.toString()}
+                    />
+                  ))}
+                </Picker>
+              </View>
+
+              {/* Seconds Picker */}
+              <View className="flex-1 mx-1">
+                <Picker
+                  selectedValue={seconds.toString()}
+                  onValueChange={(itemValue) =>
+                    setSeconds(parseInt(itemValue, 10))
+                  }
+                  style={{
+                    backgroundColor: isDarkMode ? "#374151" : "#eee",
+                    borderRadius: 10,
+                    color: isDarkMode ? "#fff" : "#000",
+                  }}
+                >
+                  {Array.from({ length: 60 }, (_, i) => (
+                    <Picker.Item
+                      key={i}
+                      label={i.toString()}
+                      value={i.toString()}
+                    />
+                  ))}
+                </Picker>
+              </View>
+            </View>
+
+            {/* Timer Controls */}
+            <View className="flex-row justify-between mt-6">
+              <TouchableOpacity
+                onPress={startTimer}
+                className="flex-1 bg-green-500 py-3 rounded-lg mr-2"
+              >
+                <Text className="text-white font-bold text-center">Start</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={resetTimer}
+                className="flex-1 bg-red-500 py-3 rounded-lg"
+              >
+                <Text className="text-white font-bold text-center">Reset</Text>
+              </TouchableOpacity>
+            </View>
+            {/* Pomodoro Buttons */}
+            <View className="flex-row justify-between mt-4">
+              <TouchableOpacity
+                onPress={() => {
+                  setHours(0);
+                  setMinutes(25);
+                  setSeconds(0);
+                }}
+                className="flex-1 bg-[#800020] py-3 rounded-lg mr-2"
+              >
+                <Text className="text-white font-bold text-center">
+                  Pomodoro
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  setHours(0);
+                  setMinutes(5);
+                  setSeconds(0);
+                }}
+                className="flex-1 bg-gray-300 dark:bg-gray-700 py-3 rounded-lg"
+              >
+                <Text className="text-gray-800 dark:text-gray-100 font-bold text-center">
+                  Rest
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         </ScrollView>
       )}
 
@@ -331,7 +385,11 @@ export default function TimerPage() {
             <TouchableOpacity
               onPress={startStopwatch}
               disabled={stopwatchRunning}
-              className={`${stopwatchRunning ? "flex-1 bg-green-400 py-3 rounded-lg mr-2" : "flex-1 bg-green-500 py-3 rounded-lg mr-2"}`}
+              className={`${
+                stopwatchRunning
+                  ? "flex-1 bg-green-400 py-3 rounded-lg mr-2"
+                  : "flex-1 bg-green-500 py-3 rounded-lg mr-2"
+              }`}
             >
               <Text className="text-white font-bold text-center">Start</Text>
             </TouchableOpacity>
@@ -363,23 +421,23 @@ export default function TimerPage() {
             sessions.map((session, index) => (
               <View
                 key={index}
-                className="bg-white dark:bg-gray-800 p-4 rounded-lg mb-4 shadow-sm"
+                className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm mb-4"
               >
                 <Text className="text-lg font-bold text-gray-800 dark:text-gray-100">
                   {session.title}
                 </Text>
-                <Text className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                <Text className="text-gray-600 dark:text-gray-300">
                   Duration: {session.duration}
                 </Text>
-                <Text className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                <Text className="text-gray-600 dark:text-gray-300">
                   Started: {session.startTime}
                 </Text>
-                <Text className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                <Text className="text-gray-600 dark:text-gray-300">
                   Ended: {session.endTime}
                 </Text>
                 <TouchableOpacity
                   onPress={() => deleteSession(index)}
-                  className="mt-4 bg-red-500 py-2 px-4 rounded-lg"
+                  className="mt-2 bg-red-500 py-2 rounded-lg"
                 >
                   <Text className="text-white font-bold text-center">
                     Delete
@@ -388,14 +446,10 @@ export default function TimerPage() {
               </View>
             ))
           ) : (
-            <View className="items-center mt-10">
-              <Ionicons name="time-outline" size={64} color="gray" />
-              <Text className="text-lg text-gray-600 dark:text-gray-400 mt-4">
-                No saved sessions yet.
-              </Text>
-            </View>
+            <Text className="text-center text-gray-500 dark:text-gray-400">
+              No sessions saved yet.
+            </Text>
           )}
-
           {sessions.length > 0 && (
             <TouchableOpacity
               onPress={clearAllSessions}
@@ -411,3 +465,26 @@ export default function TimerPage() {
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f9f9f9",
+  },
+  pickerContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 20,
+  },
+  pickerStyle: {
+    backgroundColor: "#fff",
+    borderRadius: 10,
+  },
+  textStyle: {
+    color: "#000",
+    fontSize: 18,
+  },
+});
