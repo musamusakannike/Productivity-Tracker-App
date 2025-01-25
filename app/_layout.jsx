@@ -107,7 +107,7 @@ export default function Layout() {
     { name: "Home", icon: "home-outline", route: "/" },
     { name: "Settings", icon: "settings-outline", route: "/settings" },
     { name: "Categories", icon: "grid-outline", route: "/categories" },
-    { name: "Notes", icon: "book-outline", route: "/notes" },
+    { name: "Diary", icon: "book-outline", route: "/notes" },
     { name: "Help", icon: "help-outline", route: "/help" },
   ]
 
