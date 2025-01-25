@@ -313,19 +313,25 @@ export default function TimerPage() {
           className="px-6"
         >
           {/* Stopwatch UI */}
-          <Text className="text-4xl font-bold text-center mt-6 text-gray-800 dark:text-gray-100">
-            {`${Math.floor(stopwatchTime / 3600)
-              .toString()
-              .padStart(2, "0")}:${Math.floor((stopwatchTime % 3600) / 60)
-              .toString()
-              .padStart(2, "0")}:${(stopwatchTime % 60)
-              .toString()
-              .padStart(2, "0")}`}
-          </Text>
-          <View className="flex-row justify-between mt-6">
+          <View className="flex items-center mt-16">
+            <View className="w-64 h-64 p-3 rounded-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center shadow-md">
+              <Text className="text-5xl font-bold text-gray-800 dark:text-gray-100">
+                {`${Math.floor(stopwatchTime / 3600)
+                  .toString()
+                  .padStart(2, "0")}:${Math.floor((stopwatchTime % 3600) / 60)
+                  .toString()
+                  .padStart(2, "0")}:${(stopwatchTime % 60)
+                  .toString()
+                  .padStart(2, "0")}`}
+              </Text>
+            </View>
+          </View>
+
+          <View className="flex-row justify-between mt-10">
             <TouchableOpacity
               onPress={startStopwatch}
-              className="flex-1 bg-green-500 py-3 rounded-lg mr-2"
+              disabled={stopwatchRunning}
+              className={`${stopwatchRunning ? "flex-1 bg-green-400 py-3 rounded-lg mr-2" : "flex-1 bg-green-500 py-3 rounded-lg mr-2"}`}
             >
               <Text className="text-white font-bold text-center">Start</Text>
             </TouchableOpacity>
