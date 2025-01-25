@@ -88,7 +88,7 @@ export default function Notes() {
   return (
     <SafeAreaView className="flex-1 bg-gray-100 dark:bg-gray-900 px-6">
       <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
-        <Text className="text-lg font-bold text-gray-800 dark:text-gray-100 mt-6 mb-4">
+        <Text className="text-lg font-bold text-gray-800 dark:text-gray-100 my-2">
           Diary
         </Text>
 
