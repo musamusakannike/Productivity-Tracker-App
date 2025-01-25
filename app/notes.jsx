@@ -42,21 +42,38 @@ export default function Notes() {
     }
 
     return (
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} className="py-4">
-        {dates.map((date) => (
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        className="px-1 mt-4 max-h-[70px]"
+      >
+        {dates.reverse().map((date) => (
           <TouchableOpacity
             key={date}
             onPress={() => setSelectedDate(date)}
-            className={`px-4 py-2 mx-2 rounded-lg ${
-              selectedDate === date ? "bg-[#800020]" : "bg-gray-200"
+            className={`w-16 h-16 rounded-lg mx-1 flex items-center justify-center ${
+              date === selectedDate
+                ? "bg-[#800020]"
+                : "bg-gray-200 dark:bg-gray-700"
             }`}
           >
             <Text
-              className={`text-sm font-bold ${
-                selectedDate === date ? "text-white" : "text-gray-800"
+              className={`text-xs font-light ${
+                date === selectedDate
+                  ? "text-white"
+                  : "text-gray-800 dark:text-gray-100"
               }`}
             >
-              {moment(date).format("MMM D")}
+              {new Date(date).toDateString().slice(0, 3)} {/* Day */}
+            </Text>
+            <Text
+              className={`text-lg font-bold ${
+                date === selectedDate
+                  ? "text-white"
+                  : "text-gray-800 dark:text-gray-100"
+              }`}
+            >
+              {new Date(date).getDate()}
             </Text>
           </TouchableOpacity>
         ))}
@@ -64,7 +81,9 @@ export default function Notes() {
     );
   };
 
-  const selectedNote = notes.find((note) => note.date === selectedDate);
+  const notesForSelectedDate = notes.filter(
+    (note) => note.date === selectedDate
+  );
 
   return (
     <SafeAreaView className="flex-1 bg-gray-100 dark:bg-gray-900 px-6">
@@ -75,49 +94,54 @@ export default function Notes() {
 
         {renderDateScroll()}
 
-        {selectedNote ? (
-          <View className="bg-white dark:bg-gray-800 p-4 rounded-lg mb-4 mt-4">
-            {selectedNote.heading ? (
-              <Text className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-2">
-                {selectedNote.heading}
+        {notesForSelectedDate.length > 0 ? (
+          notesForSelectedDate.map((note) => (
+            <View
+              key={note.id}
+              className="bg-white dark:bg-gray-800 p-4 rounded-lg mb-4 mt-4"
+            >
+              {note.heading ? (
+                <Text className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-2">
+                  {note.heading}
+                </Text>
+              ) : null}
+              <Text className="text-gray-600 dark:text-gray-400 mb-2">
+                {note.body}
               </Text>
-            ) : null}
-            <Text className="text-gray-600 dark:text-gray-400 mb-2">
-              {selectedNote.body}
-            </Text>
-            <Text className="text-gray-400 dark:text-gray-500 text-sm">
-              {moment(selectedNote.date).format("MMMM D, YYYY")}
-            </Text>
+              <Text className="text-gray-400 dark:text-gray-500 text-sm">
+                {moment(note.date).format("MMMM D, YYYY")}
+              </Text>
 
-            {/* Actions */}
-            {moment(selectedDate).isSameOrAfter(moment(), "day") && (
-              <View className="flex-row justify-end gap-x-2 space-x-4 mt-2">
-                <TouchableOpacity
-                  onPress={() =>
-                    router.push({
-                      pathname: "/add-notes",
-                      params: { noteId: selectedNote.id, date: selectedDate },
-                    })
-                  }
-                  className="bg-blue-500 px-4 py-2 rounded-lg"
-                >
-                  <Text className="text-white font-bold">Edit</Text>
-                </TouchableOpacity>
+              {/* Actions */}
+              {moment(selectedDate).isSameOrAfter(moment(), "day") && (
+                <View className="flex-row justify-end gap-x-2 space-x-4 mt-2">
+                  <TouchableOpacity
+                    onPress={() =>
+                      router.push({
+                        pathname: "/add-notes",
+                        params: { noteId: note.id, date: selectedDate },
+                      })
+                    }
+                    className="bg-blue-500 px-4 py-2 rounded-lg"
+                  >
+                    <Text className="text-white font-bold">Edit</Text>
+                  </TouchableOpacity>
 
-                <TouchableOpacity
-                  onPress={() => deleteNote(selectedNote.id)}
-                  className="bg-red-500 px-4 py-2 rounded-lg"
-                >
-                  <Text className="text-white font-bold">Delete</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-          </View>
+                  <TouchableOpacity
+                    onPress={() => deleteNote(note.id)}
+                    className="bg-red-500 px-4 py-2 rounded-lg"
+                  >
+                    <Text className="text-white font-bold">Delete</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
+          ))
         ) : (
           <View className="mt-10 items-center">
             <Ionicons name="document-outline" size={64} color="gray" />
             <Text className="text-lg font-semibold text-gray-600 dark:text-gray-400 text-center mt-4">
-              No entry for this day.
+              No entries for this day.
             </Text>
             {moment(selectedDate).isSameOrAfter(moment(), "day") && (
               <TouchableOpacity
