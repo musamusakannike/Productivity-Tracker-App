@@ -4,9 +4,11 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { loadData, saveData } from "../utils/storage";
+import moment from "moment";
 
 export default function Notes() {
   const [notes, setNotes] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(moment().format("YYYY-MM-DD"));
   const router = useRouter();
 
   useEffect(() => {
@@ -32,39 +34,69 @@ export default function Notes() {
     ]);
   };
 
+  const renderDateScroll = () => {
+    const dates = [];
+    for (let i = 0; i < 30; i++) {
+      const date = moment().subtract(i, "days").format("YYYY-MM-DD");
+      dates.unshift(date);
+    }
+
+    return (
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} className="py-4">
+        {dates.map((date) => (
+          <TouchableOpacity
+            key={date}
+            onPress={() => setSelectedDate(date)}
+            className={`px-4 py-2 mx-2 rounded-lg ${
+              selectedDate === date ? "bg-[#800020]" : "bg-gray-200"
+            }`}
+          >
+            <Text
+              className={`text-sm font-bold ${
+                selectedDate === date ? "text-white" : "text-gray-800"
+              }`}
+            >
+              {moment(date).format("MMM D")}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+    );
+  };
+
+  const selectedNote = notes.find((note) => note.date === selectedDate);
+
   return (
     <SafeAreaView className="flex-1 bg-gray-100 dark:bg-gray-900 px-6">
       <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
         <Text className="text-lg font-bold text-gray-800 dark:text-gray-100 mt-6 mb-4">
-          Notes
+          Diary
         </Text>
 
-        {notes.length > 0 ? (
-          notes.map((note) => (
-            <View
-              key={note.id}
-              className="bg-white dark:bg-gray-800 p-4 rounded-lg mb-4"
-            >
-              {note.heading ? (
-                <Text className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-2">
-                  {note.heading}
-                </Text>
-              ) : null}
-              <Text className="text-gray-600 dark:text-gray-400 mb-2">
-                {note.body}
-              </Text>
-              <Text className="text-gray-400 dark:text-gray-500 text-sm">
-                {new Date(note.date).toLocaleDateString()}{" "}
-                {/* Display note date */}
-              </Text>
+        {renderDateScroll()}
 
-              {/* Actions */}
+        {selectedNote ? (
+          <View className="bg-white dark:bg-gray-800 p-4 rounded-lg mb-4 mt-4">
+            {selectedNote.heading ? (
+              <Text className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-2">
+                {selectedNote.heading}
+              </Text>
+            ) : null}
+            <Text className="text-gray-600 dark:text-gray-400 mb-2">
+              {selectedNote.body}
+            </Text>
+            <Text className="text-gray-400 dark:text-gray-500 text-sm">
+              {moment(selectedNote.date).format("MMMM D, YYYY")}
+            </Text>
+
+            {/* Actions */}
+            {moment(selectedDate).isSameOrAfter(moment(), "day") && (
               <View className="flex-row justify-end gap-x-2 space-x-4 mt-2">
                 <TouchableOpacity
                   onPress={() =>
                     router.push({
                       pathname: "/add-notes",
-                      params: { noteId: note.id },
+                      params: { noteId: selectedNote.id, date: selectedDate },
                     })
                   }
                   className="bg-blue-500 px-4 py-2 rounded-lg"
@@ -73,37 +105,51 @@ export default function Notes() {
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  onPress={() => deleteNote(note.id)}
+                  onPress={() => deleteNote(selectedNote.id)}
                   className="bg-red-500 px-4 py-2 rounded-lg"
                 >
                   <Text className="text-white font-bold">Delete</Text>
                 </TouchableOpacity>
               </View>
-            </View>
-          ))
+            )}
+          </View>
         ) : (
           <View className="mt-10 items-center">
             <Ionicons name="document-outline" size={64} color="gray" />
             <Text className="text-lg font-semibold text-gray-600 dark:text-gray-400 text-center mt-4">
-              No notes found.
+              No entry for this day.
             </Text>
-            <TouchableOpacity
-              onPress={() => router.push("/add-notes")}
-              className="mt-6 bg-[#800020] py-3 px-4 rounded-lg"
-            >
-              <Text className="text-white font-bold text-center">Add Note</Text>
-            </TouchableOpacity>
+            {moment(selectedDate).isSameOrAfter(moment(), "day") && (
+              <TouchableOpacity
+                onPress={() =>
+                  router.push({
+                    pathname: "/add-notes",
+                    params: { date: selectedDate },
+                  })
+                }
+                className="mt-6 bg-[#800020] py-3 px-4 rounded-lg"
+              >
+                <Text className="text-white font-bold text-center">Add Entry</Text>
+              </TouchableOpacity>
+            )}
           </View>
         )}
       </ScrollView>
 
       {/* Floating Action Button */}
-      <TouchableOpacity
-        onPress={() => router.push("/add-notes")}
-        className="absolute bottom-6 right-6 bg-[#800020] p-4 rounded-full shadow-lg"
-      >
-        <Ionicons name="add" size={32} color="white" />
-      </TouchableOpacity>
+      {moment(selectedDate).isSameOrAfter(moment(), "day") && (
+        <TouchableOpacity
+          onPress={() =>
+            router.push({
+              pathname: "/add-notes",
+              params: { date: selectedDate },
+            })
+          }
+          className="absolute bottom-6 right-6 bg-[#800020] p-4 rounded-full shadow-lg"
+        >
+          <Ionicons name="add" size={32} color="white" />
+        </TouchableOpacity>
+      )}
     </SafeAreaView>
   );
 }
