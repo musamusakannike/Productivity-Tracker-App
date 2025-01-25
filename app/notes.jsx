@@ -1,23 +1,135 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, ScrollView, TouchableOpacity, Alert } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+  Modal,
+  TextInput,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { loadData, saveData } from "../utils/storage";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import moment from "moment";
 
 export default function Notes() {
   const [notes, setNotes] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(moment().format("YYYY-MM-DD"));
+  const [selectedDate, setSelectedDate] = useState(
+    moment().format("YYYY-MM-DD")
+  );
+  const [isPasswordModalVisible, setIsPasswordModalVisible] = useState(false);
+  const [passwordInput, setPasswordInput] = useState("");
+  const [notesPassword, setNotesPassword] = useState(null);
+  const [isSettingNewPassword, setIsSettingNewPassword] = useState(false);
   const router = useRouter();
 
+  const loadData = async (key) => {
+    try {
+      const value = await AsyncStorage.getItem(key);
+      return value ? JSON.parse(value) : null;
+    } catch (error) {
+      console.error("Error loading data:", error);
+      return null;
+    }
+  };
+
+  const saveData = async (key, value) => {
+    try {
+      await AsyncStorage.setItem(key, JSON.stringify(value));
+    } catch (error) {
+      console.error("Error saving data:", error);
+    }
+  };
+
   useEffect(() => {
-    const fetchNotes = async () => {
-      const storedNotes = await loadData("notes");
-      setNotes(storedNotes || []);
+    const checkPassword = async () => {
+      try {
+        const storedPassword = await loadData("notesPassword");
+        if (!storedPassword || storedPassword === null) {
+          setIsSettingNewPassword(true);
+          setIsPasswordModalVisible(true);
+        } else {
+          setNotesPassword(storedPassword);
+          setIsPasswordModalVisible(true);
+        }
+      } catch (error) {
+        console.error("Error loading password:", error);
+      }
     };
-    fetchNotes();
-  }, []);
+
+    if (!isPasswordModalVisible && notesPassword) {
+      fetchNotes();
+    }
+
+    checkPassword();
+  }, [notesPassword]);
+
+  const handlePasswordSubmit = async () => {
+    if (passwordInput.trim() === "") {
+      Alert.alert("Invalid Password", "Password cannot be empty.");
+      return;
+    }
+
+    if (isSettingNewPassword) {
+      try {
+        await saveData("notesPassword", passwordInput);
+        setNotesPassword(passwordInput);
+        setIsSettingNewPassword(false);
+        setIsPasswordModalVisible(false);
+        Alert.alert("Success", "Password has been set.");
+      } catch (error) {
+        console.error("Error saving password:", error);
+        Alert.alert("Error", "Could not save password. Try again.");
+      }
+    } else {
+      if (passwordInput === notesPassword) {
+        setIsPasswordModalVisible(false);
+      } else {
+        Alert.alert("Incorrect Password", "Please try again.");
+      }
+    }
+
+    setPasswordInput("");
+  };
+
+  const renderPasswordModal = () => (
+    <Modal
+      transparent={true}
+      visible={isPasswordModalVisible}
+      animationType="slide"
+      onRequestClose={() => setIsPasswordModalVisible(false)}
+    >
+      <View className="flex-1 justify-center items-center bg-black bg-opacity-50">
+        <View className="bg-white dark:bg-gray-800 p-6 rounded-lg w-80">
+          <Text className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            {isSettingNewPassword
+              ? "Please set a secure password for your notes."
+              : "Enter your password to access your notes."}
+          </Text>
+          <TextInput
+            className="border border-gray-300 dark:border-gray-700 p-2 rounded-lg mb-4 text-gray-800 dark:text-gray-100"
+            placeholder="Password"
+            secureTextEntry
+            value={passwordInput}
+            onChangeText={setPasswordInput}
+          />
+          <TouchableOpacity
+            onPress={handlePasswordSubmit}
+            className="bg-[#800020] py-2 px-4 rounded-lg"
+          >
+            <Text className="text-white font-bold text-center">Submit</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+
+  const fetchNotes = async () => {
+    const storedNotes = await loadData("notes");
+    setNotes(storedNotes || []);
+  };
 
   const deleteNote = async (noteId) => {
     Alert.alert("Delete Note", "Are you sure you want to delete this note?", [
@@ -87,6 +199,7 @@ export default function Notes() {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-100 dark:bg-gray-900 px-6">
+      {renderPasswordModal()}
       <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
         <Text className="text-lg font-bold text-gray-800 dark:text-gray-100 my-2">
           Diary
@@ -153,7 +266,9 @@ export default function Notes() {
                 }
                 className="mt-6 bg-[#800020] py-3 px-4 rounded-lg"
               >
-                <Text className="text-white font-bold text-center">Add Entry</Text>
+                <Text className="text-white font-bold text-center">
+                  Add Entry
+                </Text>
               </TouchableOpacity>
             )}
           </View>
