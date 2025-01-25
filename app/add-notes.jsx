@@ -5,13 +5,15 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { loadData, saveData } from "../utils/storage";
+import moment from "moment";
 
 export default function AddNotes() {
-  const { noteId } = useLocalSearchParams();
+  const { noteId, date } = useLocalSearchParams();
   const [heading, setHeading] = useState("");
   const [body, setBody] = useState("");
   const router = useRouter();
@@ -35,28 +37,28 @@ export default function AddNotes() {
       alert("Note body is required.");
       return;
     }
-  
+
     const newNote = {
       id: noteId || Date.now().toString(),
       heading: heading.trim(),
       body: body.trim(),
-      date: noteId ? new Date().toISOString() : Date.now(), // Add note date
+      date: date || moment().format("YYYY-MM-DD"),
     };
-  
+
     const existingNotes = await loadData("notes");
     const updatedNotes = noteId
       ? existingNotes.map((n) => (n.id === noteId ? newNote : n))
       : [...existingNotes, newNote];
-  
+
     await saveData("notes", updatedNotes);
     router.push("/notes");
-  };  
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-gray-100 dark:bg-gray-900 px-6">
       <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
         <Text className="text-lg font-bold text-gray-800 dark:text-gray-100 mt-6 mb-4">
-          {noteId ? "Edit Note" : "Add Note"}
+          {noteId ? "Edit Entry" : "Add Entry"}
         </Text>
 
         {/* Note Heading */}
@@ -85,7 +87,7 @@ export default function AddNotes() {
           className="mt-6 bg-[#800020] py-3 px-4 rounded-lg"
         >
           <Text className="text-white font-bold text-center">
-            {noteId ? "Save Changes" : "Add Note"}
+            {noteId ? "Save Changes" : "Add Entry"}
           </Text>
         </TouchableOpacity>
       </ScrollView>
