@@ -226,7 +226,7 @@ export default function TimerPage() {
                   .padStart(2, "0")}`}
               </Text>
             )}
-            
+
             {/* Title Input */}
             <TextInput
               placeholder="Session Title"
@@ -246,7 +246,10 @@ export default function TimerPage() {
               className="flex-row justify-between items-center mt-6"
             >
               {/* Hours Picker */}
-              <View className="flex-1 mx-1">
+              <View className="flex-1 flex flex-col mx-1 justify-center">
+                <Text className="text-sm font-medium text-gray-800 dark:text-gray-200 mb-2 mx-auto">
+                  Hours
+                </Text>
                 <Picker
                   selectedValue={hours.toString()}
                   onValueChange={(itemValue) =>
@@ -269,7 +272,10 @@ export default function TimerPage() {
               </View>
 
               {/* Minutes Picker */}
-              <View className="flex-1 mx-1">
+              <View className="flex-1 flex flex-col mx-1 justify-center">
+                <Text className="text-sm font-medium text-gray-800 dark:text-gray-200 mb-2 mx-auto">
+                  Minutes
+                </Text>
                 <Picker
                   selectedValue={minutes.toString()}
                   onValueChange={(itemValue) =>
@@ -292,7 +298,10 @@ export default function TimerPage() {
               </View>
 
               {/* Seconds Picker */}
-              <View className="flex-1 mx-1">
+              <View className="flex-1 flex flex-col mx-1 justify-center">
+                <Text className="text-sm font-medium text-gray-800 dark:text-gray-200 mb-2 mx-auto">
+                  Seconds
+                </Text>
                 <Picker
                   selectedValue={seconds.toString()}
                   onValueChange={(itemValue) =>
