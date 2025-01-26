@@ -5,11 +5,11 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
-  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import CustomAlert from "../components/UI/CustomAlert";
 
 const inBuiltCategories = [
   { name: "Health", icon: "fitness-outline", color: "#4CAF50" },
@@ -54,6 +54,21 @@ export default function Categories() {
   const [selectedIcon, setSelectedIcon] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
 
+  // Custom Alert State
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertAction, setAlertAction] = useState(() => {});
+  const [alertConfirmText, setAlertConfirmText] = useState("Confirm");
+
+  const showAlert = (title, message, action, alertText) => {
+    setAlertTitle(title);
+    setAlertMessage(message);
+    setAlertAction(() => action);
+    setAlertVisible(true);
+    setAlertConfirmText(alertText);
+  };
+
   useEffect(() => {
     const fetchCategories = async () => {
       const storedCategories = await AsyncStorage.getItem("categories");
@@ -72,7 +87,14 @@ export default function Categories() {
 
   const addCategory = async () => {
     if (!newCategoryName.trim() || !selectedIcon || !selectedColor) {
-      Alert.alert("Invalid Input", "Please fill all fields.");
+      showAlert(
+        "Invalid Input",
+        "Please fill all fields.",
+        () => {
+          setAlertVisible(false);
+        },
+        "OK"
+      );
       return;
     }
 
@@ -89,7 +111,14 @@ export default function Categories() {
     setNewCategoryName("");
     setSelectedIcon("");
     setSelectedColor("");
-    Alert.alert("Success", "Category added successfully!");
+    showAlert(
+      "Success",
+      "Category added successfully!",
+      () => {
+        setAlertVisible(false);
+      },
+      "OK"
+    );
   };
 
   const deleteCategory = async (categoryName) => {
@@ -97,31 +126,40 @@ export default function Categories() {
       (category) => category.name === categoryName
     );
     if (isBuiltIn) {
-      Alert.alert("Error", "In-built categories cannot be deleted.");
+      showAlert(
+        "Error",
+        "In-built categories cannot be deleted.",
+        () => {
+          setAlertVisible(false);
+        },
+        "OK"
+      );
       return;
     }
 
-    Alert.alert(
+    showAlert(
       "Delete Category",
       `Are you sure you want to delete the "${categoryName}" category?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            const updatedCategories = categories.filter(
-              (category) => category.name !== categoryName
-            );
-            setCategories(updatedCategories);
-            await AsyncStorage.setItem(
-              "categories",
-              JSON.stringify(updatedCategories)
-            );
-            Alert.alert("Success", "Category deleted successfully!");
+      async () => {
+        const updatedCategories = categories.filter(
+          (category) => category.name !== categoryName
+        );
+        setCategories(updatedCategories);
+        await AsyncStorage.setItem(
+          "categories",
+          JSON.stringify(updatedCategories)
+        );
+        setAlertVisible(false);
+        showAlert(
+          "Success",
+          `"${categoryName}" category deleted successfully!`,
+          () => {
+            setAlertVisible(false);
           },
-        },
-      ]
+          "OK"
+        );
+      },
+      "Delete"
     );
   };
 
@@ -222,6 +260,15 @@ export default function Categories() {
           <Text className="text-white font-bold text-center">Add Category</Text>
         </TouchableOpacity>
       </View>
+      {/* Custom Alert */}
+      <CustomAlert
+        isVisible={alertVisible}
+        title={alertTitle}
+        message={alertMessage}
+        onConfirm={alertAction}
+        onCancel={() => setAlertVisible(false)}
+        confirmText={alertConfirmText}
+      />
     </SafeAreaView>
   );
 }
