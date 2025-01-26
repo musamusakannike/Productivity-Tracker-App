@@ -4,6 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { loadData, saveData } from "../utils/storage";
 import { useRouter } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import CustomAlert from "../components/UI/CustomAlert";
 
 const generateDates = (days) => {
   return [...Array(days)].map((_, i) => {
@@ -19,6 +20,22 @@ export default function Routines() {
     new Date().toISOString().split("T")[0]
   );
   const dates = generateDates(30);
+
+  // Custom Alert State
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertAction, setAlertAction] = useState(() => {});
+  const [alertConfirmText, setAlertConfirmText] = useState("Confirm");
+
+  const showAlert = (title, message, action, alertText) => {
+    setAlertTitle(title);
+    setAlertMessage(message);
+    setAlertAction(() => action);
+    setAlertVisible(true);
+    setAlertConfirmText(alertText);
+  };
+
   const router = useRouter();
 
   useEffect(() => {
@@ -30,23 +47,18 @@ export default function Routines() {
   }, []);
 
   const deleteRoutine = async (routineId) => {
-    Alert.alert(
+    showAlert(
       "Delete Routine",
       "Are you sure you want to delete this routine?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            const updatedRoutines = routines.filter(
-              (routine) => routine.id !== routineId
-            );
-            setRoutines(updatedRoutines);
-            await saveData("routines", updatedRoutines);
-          },
-        },
-      ]
+      async () => {
+        const updatedRoutines = routines.filter(
+          (routine) => routine.id !== routineId
+        );
+        setRoutines(updatedRoutines);
+        await saveData("routines", updatedRoutines);
+        setAlertVisible(false); // Hide alert after action
+      },
+      "Delete"
     );
   };
 
@@ -59,9 +71,13 @@ export default function Routines() {
     const today = new Date().toISOString().split("T")[0];
 
     if (selectedDate !== today) {
-      Alert.alert(
+      showAlert(
         "Invalid Action",
-        "You can only toggle tasks for today's date."
+        "You can only toggle tasks for today's date.",
+        () => {
+          setAlertVisible(false);
+        },
+        "OK"
       );
       return;
     }
@@ -217,6 +233,15 @@ export default function Routines() {
       >
         <Ionicons name="add" size={32} color="white" />
       </TouchableOpacity>
+      {/* Custom Alert */}
+      <CustomAlert
+        isVisible={alertVisible}
+        title={alertTitle}
+        message={alertMessage}
+        onConfirm={alertAction}
+        onCancel={() => setAlertVisible(false)}
+        confirmText={alertConfirmText}
+      />
     </SafeAreaView>
   );
 }
