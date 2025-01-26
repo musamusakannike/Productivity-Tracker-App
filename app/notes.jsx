@@ -44,9 +44,19 @@ export default function Notes() {
   const loadData = async (key) => {
     try {
       const value = await AsyncStorage.getItem(key);
-      return value ? JSON.parse(value) : null;
+      if (!value) return null;
+
+      try {
+        // Attempt to parse the data as JSON
+        return JSON.parse(value);
+      } catch (error) {
+        console.warn(
+          `Value for key "${key}" is not JSON. Returning raw value.`
+        );
+        return value; // Return the raw string if it's not JSON
+      }
     } catch (error) {
-      console.error("Error loading data:", error);
+      console.error(`Error loading data for key "${key}":`, error);
       return null;
     }
   };
@@ -333,7 +343,7 @@ export default function Notes() {
           <Ionicons name="add" size={32} color="white" />
         </TouchableOpacity>
       )}
-      
+
       {/* Custom Alert */}
       <CustomAlert
         isVisible={alertVisible}
