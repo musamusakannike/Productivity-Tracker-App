@@ -12,7 +12,7 @@ export default function CustomAlert({
 }) {
   return (
     <Modal transparent visible={isVisible} animationType="fade">
-      <View className="flex-1 justify-center items-center bg-black/50">
+      <View className="flex-1 justify-center items-center bg-black/50 min-w-52">
         <View className="bg-white dark:bg-gray-800 rounded-lg p-6 w-4/5 shadow-lg">
           <Text className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4">
             {title}
