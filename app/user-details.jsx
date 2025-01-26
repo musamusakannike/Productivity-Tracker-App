@@ -3,15 +3,38 @@ import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
+import CustomAlert from "../components/UI/CustomAlert";
 
 export default function UserDetails() {
   const [name, setName] = useState("");
   const [age, setAge] = useState("");
   const router = useRouter();
 
+  // Custom Alert State
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertAction, setAlertAction] = useState(() => {});
+  const [alertConfirmText, setAlertConfirmText] = useState("Confirm");
+
+  const showAlert = (title, message, action, alertText) => {
+    setAlertTitle(title);
+    setAlertMessage(message);
+    setAlertAction(() => action);
+    setAlertVisible(true);
+    setAlertConfirmText(alertText);
+  };
+
   const handleSaveDetails = async () => {
     if (!name.trim()) {
-      Alert.alert("Name Required", "Please enter your name to continue.");
+      showAlert(
+        "Name Required",
+        "Please enter your name to continue.",
+        () => {
+          setAlertVisible(false);
+        },
+        "OK"
+      );
       return;
     }
 
@@ -60,6 +83,15 @@ export default function UserDetails() {
       >
         <Text className="text-white text-center font-bold">Continue</Text>
       </TouchableOpacity>
+      {/* Custom Alert */}
+      <CustomAlert
+        isVisible={alertVisible}
+        title={alertTitle}
+        message={alertMessage}
+        onConfirm={alertAction}
+        onCancel={() => setAlertVisible(false)}
+        confirmText={alertConfirmText}
+      />
     </SafeAreaView>
   );
 }
