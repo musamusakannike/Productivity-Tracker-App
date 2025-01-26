@@ -155,6 +155,7 @@ export default function Notes() {
           <TextInput
             className="border border-gray-300 dark:border-gray-700 p-2 rounded-lg mb-4 text-gray-800 dark:text-gray-100"
             placeholder="Password"
+            placeholderTextColor={"#aaa"}
             secureTextEntry
             value={passwordInput}
             onChangeText={setPasswordInput}
