@@ -1,20 +1,31 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  Alert,
-} from "react-native";
+import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useColorScheme } from "nativewind";
 import { useRouter } from "expo-router";
+import CustomAlert from "../components/UI/CustomAlert";
 
 export default function Settings() {
   const [userName, setUserName] = useState("");
   const [userAge, setUserAge] = useState("");
   const [editMode, setEditMode] = useState(false);
+
+  // Custom Alert State
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertAction, setAlertAction] = useState(() => {});
+  const [alertConfirmText, setAlertConfirmText] = useState("Confirm");
+
+  const showAlert = (title, message, action, alertText) => {
+    setAlertTitle(title);
+    setAlertMessage(message);
+    setAlertAction(() => action);
+    setAlertVisible(true);
+    setAlertConfirmText(alertText);
+  };
+
   const router = useRouter();
   const { colorScheme, setColorScheme } = useColorScheme(); // NativeWind hook
 
@@ -33,35 +44,61 @@ export default function Settings() {
 
   const saveUserDetails = async () => {
     if (!userName.trim()) {
-      Alert.alert("Invalid Input", "Name is required.");
+      showAlert(
+        "Invalid Input",
+        "Name is required.",
+        () => {
+          setAlertVisible(false);
+        },
+        "OK"
+      );
       return;
     }
 
     const updatedAccount = { name: userName.trim(), age: userAge.trim() };
     await AsyncStorage.setItem("userAccount", JSON.stringify(updatedAccount));
     setEditMode(false);
-    Alert.alert("Success", "User details updated successfully.");
+    showAlert(
+      "Success",
+      "User details updated successfully.",
+      () => {
+        setAlertVisible(false);
+      },
+      "OK"
+    );
   };
 
   const toggleTheme = () => {
     const newTheme = colorScheme === "light" ? "dark" : "light";
     setColorScheme(newTheme);
-    Alert.alert("Theme Changed", `The app theme is now set to ${newTheme}.`);
+    showAlert(
+      "Theme Changed",
+      `The app theme is now set to ${newTheme}.`,
+      () => {
+        setAlertVisible(false);
+      },
+      "OK"
+    );
   };
 
   const clearAppMemory = async () => {
-    Alert.alert("Clear App Memory", "Are you sure you want to clear all data?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Clear",
-        style: "destructive",
-        onPress: async () => {
-          await AsyncStorage.clear();
-          Alert.alert("Success", "App memory cleared.");
-          router.push("/")
-        },
+    showAlert(
+      "Clear App Memory",
+      "Are you sure you want to clear all data?",
+      async () => {
+        await AsyncStorage.clear();
+        showAlert(
+          "Success",
+          "App memory cleared.",
+          () => {
+            router.push("/");
+          },
+          "OK"
+        );
+        setAlertVisible(false);
       },
-    ]);
+      "Clear"
+    );
   };
 
   return (
@@ -152,6 +189,16 @@ export default function Settings() {
           <Text className="text-white text-center font-bold">Clear Memory</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Custom Alert */}
+      <CustomAlert
+        isVisible={alertVisible}
+        title={alertTitle}
+        message={alertMessage}
+        onConfirm={alertAction}
+        onCancel={() => setAlertVisible(false)}
+        confirmText={alertConfirmText}
+      />
     </SafeAreaView>
   );
 }
