@@ -31,7 +31,6 @@ Notifications.setNotificationHandler({
 // Define the background task
 TaskManager.defineTask(BACKGROUND_FETCH_TASK, async () => {
   const now = Date.now();
-  console.log(`Background fetch called at: ${new Date(now).toISOString()}`);
 
   // Retrieve the timer state from AsyncStorage
   const timerState = await AsyncStorage.getItem("timerState");

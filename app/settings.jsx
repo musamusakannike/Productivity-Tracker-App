@@ -108,8 +108,6 @@ export default function Settings() {
 
   const changePassword = async () => {
     const storedPassword = JSON.parse(await AsyncStorage.getItem("notesPassword"));
-    console.log(storedPassword);
-    console.log(currentPassword);
     // Validate current password
     if (storedPassword.trim() !== currentPassword.trim()) {
       showAlert(
