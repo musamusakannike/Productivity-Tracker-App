@@ -4,6 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { loadData, saveData } from "../utils/storage";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import CustomAlert from "../components/UI/CustomAlert";
 
 const generateDates = (days) => {
   return [...Array(days)].map((_, i) => {
@@ -18,6 +19,22 @@ export default function Habits() {
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0]
   );
+
+  // Custom Alert State
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertAction, setAlertAction] = useState(() => {});
+  const [alertConfirmText, setAlertConfirmText] = useState("Confirm");
+
+  const showAlert = (title, message, action, alertText) => {
+    setAlertTitle(title);
+    setAlertMessage(message);
+    setAlertAction(() => action);
+    setAlertVisible(true);
+    setAlertConfirmText(alertText);
+  };
+
   const router = useRouter();
 
   useEffect(() => {
@@ -62,9 +79,13 @@ export default function Habits() {
 
     // Check if the selected date is today.
     if (selectedDate !== today) {
-      Alert.alert(
+      showAlert(
         "Invalid Action",
-        "You can only toggle completion for today's date."
+        "You can only toggle completion for today's date.",
+        () => {
+          setAlertVisible(false);
+        },
+        "OK"
       );
       return; // Exit the function if the selected date is not today.
     }
@@ -87,18 +108,16 @@ export default function Habits() {
 
   // Delete a habit
   const deleteHabit = async (habitId) => {
-    Alert.alert("Delete Habit", "Are you sure you want to delete this habit?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Delete",
-        style: "destructive",
-        onPress: async () => {
-          const updatedHabits = habits.filter((habit) => habit.id !== habitId);
-          setHabits(updatedHabits);
-          await saveData("habits", updatedHabits);
-        },
+    showAlert(
+      "Delete Habit",
+      "Are you sure you want to delete this habit?",
+      async () => {
+        const updatedHabits = habits.filter((habit) => habit.id !== habitId);
+        setHabits(updatedHabits);
+        await saveData("habits", updatedHabits);
       },
-    ]);
+      "Delete"
+    );
   };
 
   return (
@@ -262,6 +281,16 @@ export default function Habits() {
       >
         <Ionicons name="add" size={32} color="white" />
       </TouchableOpacity>
+
+      {/* Custom Alert */}
+      <CustomAlert
+        isVisible={alertVisible}
+        title={alertTitle}
+        message={alertMessage}
+        onConfirm={alertAction}
+        onCancel={() => setAlertVisible(false)}
+        confirmText={alertConfirmText}
+      />
     </SafeAreaView>
   );
 }
