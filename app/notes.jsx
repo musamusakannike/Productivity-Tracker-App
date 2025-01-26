@@ -4,7 +4,6 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
-  Alert,
   Modal,
   TextInput,
 } from "react-native";
@@ -13,6 +12,7 @@ import { useRouter } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import moment from "moment";
+import CustomAlert from "../components/UI/CustomAlert";
 
 export default function Notes() {
   const [notes, setNotes] = useState([]);
@@ -23,6 +23,22 @@ export default function Notes() {
   const [passwordInput, setPasswordInput] = useState("");
   const [notesPassword, setNotesPassword] = useState(null);
   const [isSettingNewPassword, setIsSettingNewPassword] = useState(false);
+
+  // Custom Alert State
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertAction, setAlertAction] = useState(() => {});
+  const [alertConfirmText, setAlertConfirmText] = useState("Confirm");
+
+  const showAlert = (title, message, action, alertText) => {
+    setAlertTitle(title);
+    setAlertMessage(message);
+    setAlertAction(() => action);
+    setAlertVisible(true);
+    setAlertConfirmText(alertText);
+  };
+
   const router = useRouter();
 
   const loadData = async (key) => {
@@ -68,7 +84,14 @@ export default function Notes() {
 
   const handlePasswordSubmit = async () => {
     if (passwordInput.trim() === "") {
-      Alert.alert("Invalid Password", "Password cannot be empty.");
+      showAlert(
+        "Invalid Password",
+        "Password cannot be empty.",
+        () => {
+          setAlertVisible(false);
+        },
+        "OK"
+      );
       return;
     }
 
@@ -78,16 +101,37 @@ export default function Notes() {
         setNotesPassword(passwordInput);
         setIsSettingNewPassword(false);
         setIsPasswordModalVisible(false);
-        Alert.alert("Success", "Password has been set.");
+        showAlert(
+          "Success",
+          "Password has been set.",
+          () => {
+            setAlertVisible(false);
+          },
+          "OK"
+        );
       } catch (error) {
         console.error("Error saving password:", error);
-        Alert.alert("Error", "Could not save password. Try again.");
+        showAlert(
+          "Error",
+          "Could not save password. Try again.",
+          () => {
+            setAlertVisible(false);
+          },
+          "OK"
+        );
       }
     } else {
       if (passwordInput === notesPassword) {
         setIsPasswordModalVisible(false);
       } else {
-        Alert.alert("Incorrect Password", "Please try again.");
+        showAlert(
+          "Incorrect Password",
+          "Please try again.",
+          () => {
+            setAlertVisible(false);
+          },
+          "OK"
+        );
       }
     }
 
@@ -132,18 +176,16 @@ export default function Notes() {
   };
 
   const deleteNote = async (noteId) => {
-    Alert.alert("Delete Note", "Are you sure you want to delete this note?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Delete",
-        style: "destructive",
-        onPress: async () => {
-          const updatedNotes = notes.filter((note) => note.id !== noteId);
-          setNotes(updatedNotes);
-          await saveData("notes", updatedNotes);
-        },
+    showAlert(
+      "Delete Note",
+      "Are you sure you want to delete this note?",
+      async () => {
+        const updatedNotes = notes.filter((note) => note.id !== noteId);
+        setNotes(updatedNotes);
+        await saveData("notes", updatedNotes);
       },
-    ]);
+      "Delete"
+    );
   };
 
   const renderDateScroll = () => {
@@ -289,6 +331,15 @@ export default function Notes() {
           <Ionicons name="add" size={32} color="white" />
         </TouchableOpacity>
       )}
+      {/* Custom Alert */}
+      <CustomAlert
+        isVisible={alertVisible}
+        title={alertTitle}
+        message={alertMessage}
+        onConfirm={alertAction}
+        onCancel={() => setAlertVisible(false)}
+        confirmText={alertConfirmText}
+      />
     </SafeAreaView>
   );
 }
