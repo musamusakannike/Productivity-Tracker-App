@@ -4,7 +4,6 @@ import {
   Text,
   TouchableOpacity,
   TextInput,
-  Alert,
   ScrollView,
   StyleSheet,
 } from "react-native";
@@ -15,6 +14,7 @@ import { Picker } from "@react-native-picker/picker";
 import * as BackgroundFetch from "expo-background-fetch";
 import * as TaskManager from "expo-task-manager";
 import * as Notifications from "expo-notifications";
+import CustomAlert from "../components/UI/CustomAlert";
 
 // Define the background task name
 const BACKGROUND_FETCH_TASK = "background-timer-task";
@@ -90,7 +90,27 @@ export default function TimerPage() {
   const [timeLeft, setTimeLeft] = useState(0); // Time left in seconds
   const [sessions, setSessions] = useState([]);
 
+  // State for Stopwatch
+  const [stopwatchTime, setStopwatchTime] = useState(0);
+  const [stopwatchRunning, setStopwatchRunning] = useState(false);
+
+  // Custom Alert State
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertAction, setAlertAction] = useState(() => {});
+  const [alertConfirmText, setAlertConfirmText] = useState("Confirm");
+
+  const showAlert = (title, message, action, alertText) => {
+    setAlertTitle(title);
+    setAlertMessage(message);
+    setAlertAction(() => action);
+    setAlertVisible(true);
+    setAlertConfirmText(alertText);
+  };
+
   const intervalRef = useRef(null); // For Timer
+  const stopwatchIntervalRef = useRef(null); // For Stopwatch
 
   // Request notification permissions on app start
   useEffect(() => {
@@ -125,7 +145,14 @@ export default function TimerPage() {
             clearInterval(intervalRef.current);
             setIsRunning(false);
             saveSession();
-            Alert.alert("Time's up!", "Great job completing your session!");
+            showAlert(
+              "Time's up!",
+              "Great job completing your session!",
+              () => {
+                setAlertVisible(false);
+              },
+              "Close"
+            );
             return 0;
           }
           return prev - 1;
@@ -137,6 +164,19 @@ export default function TimerPage() {
 
     return () => clearInterval(intervalRef.current);
   }, [isRunning]);
+
+  // Update Stopwatch Time
+  useEffect(() => {
+    if (stopwatchRunning) {
+      stopwatchIntervalRef.current = setInterval(() => {
+        setStopwatchTime((prev) => prev + 1);
+      }, 1000);
+    } else {
+      clearInterval(stopwatchIntervalRef.current);
+    }
+
+    return () => clearInterval(stopwatchIntervalRef.current);
+  }, [stopwatchRunning]);
 
   // Save timer state to AsyncStorage whenever it changes
   useEffect(() => {
@@ -152,9 +192,13 @@ export default function TimerPage() {
   // Start Timer
   const startTimer = () => {
     if (hours === 0 && minutes === 0 && seconds === 0) {
-      Alert.alert(
+      showAlert(
         "Invalid Duration",
-        "Please set a valid duration for the timer."
+        "Please set a valid duration for the timer.",
+        () => {
+          setAlertVisible(false);
+        },
+        "Close"
       );
       return;
     }
@@ -197,6 +241,7 @@ export default function TimerPage() {
     );
   };
 
+  // Stopwatch Controls
   const startStopwatch = () => setStopwatchRunning(true);
   const pauseStopwatch = () => setStopwatchRunning(false);
   const resetStopwatch = () => {
@@ -217,43 +262,33 @@ export default function TimerPage() {
 
   // Delete a session
   const deleteSession = async (index) => {
-    Alert.alert(
-      "Delete Session",
+    showAlert(
+      "Delete session",
       "Are you sure you want to delete this session?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            const updatedSessions = sessions.filter((_, i) => i !== index);
-            setSessions(updatedSessions);
-            await AsyncStorage.setItem(
-              "timerSessions",
-              JSON.stringify(updatedSessions)
-            );
-          },
-        },
-      ]
+      async () => {
+        const updatedSessions = sessions.filter((_, i) => i !== index);
+        setSessions(updatedSessions);
+        await AsyncStorage.setItem(
+          "timerSessions",
+          JSON.stringify(updatedSessions)
+        );
+        setAlertVisible(false);
+      },
+      "Delete"
     );
   };
 
   // Clear all sessions
   const clearAllSessions = async () => {
-    Alert.alert(
+    showAlert(
       "Clear All Sessions",
       "Are you sure you want to clear all saved sessions?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Clear",
-          style: "destructive",
-          onPress: async () => {
-            setSessions([]);
-            await AsyncStorage.removeItem("timerSessions");
-          },
-        },
-      ]
+      async () => {
+        setSessions([]);
+        await AsyncStorage.removeItem("timerSessions");
+        setAlertVisible(false);
+      },
+      "Clear"
     );
   };
 
@@ -341,7 +376,6 @@ export default function TimerPage() {
                   onValueChange={(itemValue) =>
                     setHours(parseInt(itemValue, 10))
                   }
-                  
                   style={{
                     backgroundColor: isDarkMode ? "#374151" : "#eee",
                     borderRadius: 10,
@@ -558,6 +592,16 @@ export default function TimerPage() {
           )}
         </ScrollView>
       )}
+
+      {/* Custom Alert */}
+      <CustomAlert
+        isVisible={alertVisible}
+        title={alertTitle}
+        message={alertMessage}
+        onConfirm={alertAction}
+        onCancel={() => setAlertVisible(false)}
+        confirmText={alertConfirmText}
+      />
     </SafeAreaView>
   );
 }
