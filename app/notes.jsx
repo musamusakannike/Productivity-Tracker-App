@@ -174,7 +174,6 @@ export default function Notes() {
 
   const fetchNotes = async () => {
     const storedNotes = await loadData("notes");
-    console.log("Stored notes: "+storedNotes);
     setNotes(storedNotes || []);
   };
 
