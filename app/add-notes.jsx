@@ -110,7 +110,7 @@ export default function AddNotes() {
 
       {/* Custom Alert */}
       <CustomAlert
-        visible={alertVisible}
+        isVisible={alertVisible}
         title={alertTitle}
         message={alertMessage}
         action={alertAction}
