@@ -143,7 +143,7 @@ export default function AddRoutine() {
       </TouchableOpacity>
       {/* Custom Alert */}
       <CustomAlert
-        visible={alertVisible}
+        isVisible={alertVisible}
         title={alertTitle}
         message={alertMessage}
         action={alertAction}
