@@ -87,7 +87,7 @@ export default function Home() {
         <Text className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4">
           Quick Actions
         </Text>
-        <View className="flex-row justify-between">
+        <View className="flex-row justify-between my-2">
           {[
             {
               title: "Add Habit",
@@ -104,6 +104,32 @@ export default function Home() {
               icon: "trophy-outline",
               route: "/add-goal",
             },
+          ].map((action, index) => (
+            <TouchableOpacity
+              key={index}
+              onPress={() => router.push(action.route)}
+              className="flex-1 items-center mx-2 bg-[#800020] py-6 rounded-lg shadow-lg"
+            >
+              <Ionicons name={action.icon} size={32} color="white" />
+              <Text className="text-white text-center font-bold mt-2">
+                {action.title}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        <View className="flex-row justify-between my-2">
+          {[
+            {
+              title: "Add Note",
+              icon: "document-text-outline",
+              route: "/add-notes",
+            },
+            {
+              title: "Start Timer",
+              icon: "watch-outline",
+              route: "/timer",
+            }
           ].map((action, index) => (
             <TouchableOpacity
               key={index}
