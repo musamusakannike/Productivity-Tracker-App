@@ -1,8 +1,15 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, FlatList } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  FlatList,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { saveData, loadData } from "../utils/storage";
+import CustomAlert from "../components/UI/CustomAlert";
 
 export default function AddRoutine() {
   const [name, setName] = useState("");
@@ -10,6 +17,21 @@ export default function AddRoutine() {
   const [tasks, setTasks] = useState([]);
   const [taskInput, setTaskInput] = useState("");
   const router = useRouter();
+
+  // Custom Alert State
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertAction, setAlertAction] = useState(() => {});
+  const [alertConfirmText, setAlertConfirmText] = useState("Confirm");
+
+  const showAlert = (title, message, action, alertText) => {
+    setAlertTitle(title);
+    setAlertMessage(message);
+    setAlertAction(() => action);
+    setAlertVisible(true);
+    setAlertConfirmText(alertText);
+  };
 
   const handleAddTask = () => {
     if (taskInput.trim()) {
@@ -24,7 +46,14 @@ export default function AddRoutine() {
 
   const handleSaveRoutine = async () => {
     if (!name || tasks.length === 0) {
-      alert("Please provide a routine name and at least one task.");
+      showAlert(
+        "Error",
+        "Please provide a routine name and at least one task.",
+        () => {
+          setAlertVisible(false);
+        },
+        "OK"
+      );
       return;
     }
 
@@ -95,7 +124,9 @@ export default function AddRoutine() {
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View className="flex-row justify-between items-center mt-4 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
-            <Text className="text-gray-800 dark:text-gray-100">{item.name}</Text>
+            <Text className="text-gray-800 dark:text-gray-100">
+              {item.name}
+            </Text>
             <TouchableOpacity onPress={() => handleDeleteTask(item.id)}>
               <Text className="text-red-500 font-bold">Delete</Text>
             </TouchableOpacity>
@@ -110,6 +141,15 @@ export default function AddRoutine() {
       >
         <Text className="text-white text-center font-bold">Save Routine</Text>
       </TouchableOpacity>
+      {/* Custom Alert */}
+      <CustomAlert
+        visible={alertVisible}
+        title={alertTitle}
+        message={alertMessage}
+        action={alertAction}
+        confirmText={alertConfirmText}
+        onClose={() => setAlertVisible(false)}
+      />
     </SafeAreaView>
   );
 }

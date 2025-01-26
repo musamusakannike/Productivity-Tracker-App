@@ -11,12 +11,28 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { loadData, saveData } from "../utils/storage";
 import moment from "moment";
+import CustomAlert from "../components/UI/CustomAlert";
 
 export default function AddNotes() {
   const { noteId, date } = useLocalSearchParams();
   const [heading, setHeading] = useState("");
   const [body, setBody] = useState("");
   const router = useRouter();
+
+  // Custom Alert State
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertAction, setAlertAction] = useState(() => {});
+  const [alertConfirmText, setAlertConfirmText] = useState("Confirm");
+
+  const showAlert = (title, message, action, alertText) => {
+    setAlertTitle(title);
+    setAlertMessage(message);
+    setAlertAction(() => action);
+    setAlertVisible(true);
+    setAlertConfirmText(alertText);
+  };
 
   useEffect(() => {
     const fetchNote = async () => {
@@ -34,7 +50,7 @@ export default function AddNotes() {
 
   const handleSaveNote = async () => {
     if (!body.trim()) {
-      alert("Note body is required.");
+      showAlert("Error", "Note body is required.", () => {setAlertVisible(false)}, "OK");
       return;
     }
 
@@ -91,6 +107,16 @@ export default function AddNotes() {
           </Text>
         </TouchableOpacity>
       </ScrollView>
+
+      {/* Custom Alert */}
+      <CustomAlert
+        visible={alertVisible}
+        title={alertTitle}
+        message={alertMessage}
+        action={alertAction}
+        confirmText={alertConfirmText}
+        onClose={() => setAlertVisible(false)}
+      />
     </SafeAreaView>
   );
 }

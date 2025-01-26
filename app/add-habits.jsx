@@ -11,6 +11,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { saveData, loadData } from "../utils/storage";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import CustomAlert from "../components/UI/CustomAlert";
 
 const inBuiltCategories = [
   { name: "Health", icon: "fitness-outline", color: "#4CAF50" },
@@ -37,6 +38,21 @@ export default function AddHabit() {
   const [frequency, setFrequency] = useState("Daily");
   const router = useRouter();
 
+  // Custom Alert State
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertAction, setAlertAction] = useState(() => {});
+  const [alertConfirmText, setAlertConfirmText] = useState("Confirm");
+
+  const showAlert = (title, message, action, alertText) => {
+    setAlertTitle(title);
+    setAlertMessage(message);
+    setAlertAction(() => action);
+    setAlertVisible(true);
+    setAlertConfirmText(alertText);
+  };
+
   // Fetch categories from AsyncStorage
   useEffect(() => {
     const fetchCategories = async () => {
@@ -54,7 +70,7 @@ export default function AddHabit() {
 
   const handleAddHabit = async () => {
     if (!name || !selectedCategory) {
-      alert("Please fill all required fields");
+      showAlert("Error", "Please fill all required fields", () => {setAlertVisible(false)}, "OK");
       return;
     }
 
@@ -168,6 +184,15 @@ export default function AddHabit() {
           <Text className="text-center text-white font-bold">Add Habit</Text>
         </TouchableOpacity>
       </ScrollView>
+      {/* Custom Alert */}
+      <CustomAlert
+        isVisible={alertVisible}
+        title={alertTitle}
+        message={alertMessage}
+        onConfirm={alertAction}
+        onCancel={() => setAlertVisible(false)}
+        confirmText={alertConfirmText}
+      />
     </SafeAreaView>
   );
 }

@@ -333,6 +333,7 @@ export default function Notes() {
           <Ionicons name="add" size={32} color="white" />
         </TouchableOpacity>
       )}
+      
       {/* Custom Alert */}
       <CustomAlert
         isVisible={alertVisible}

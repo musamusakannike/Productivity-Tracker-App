@@ -11,6 +11,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { Ionicons } from "@expo/vector-icons"; // Import Ionicons
 import { saveData, loadData } from "../utils/storage";
 import { useRouter } from "expo-router";
+import CustomAlert from "../components/UI/CustomAlert";
 
 export default function AddGoal() {
   const [categories, setCategories] = useState([]);
@@ -22,6 +23,21 @@ export default function AddGoal() {
   const [deadline, setDeadline] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const router = useRouter();
+
+  // Custom Alert State
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertAction, setAlertAction] = useState(() => {});
+  const [alertConfirmText, setAlertConfirmText] = useState("Confirm");
+
+  const showAlert = (title, message, action, alertText) => {
+    setAlertTitle(title);
+    setAlertMessage(message);
+    setAlertAction(() => action);
+    setAlertVisible(true);
+    setAlertConfirmText(alertText);
+  };
 
   // Fetch categories from AsyncStorage
   useEffect(() => {
@@ -64,7 +80,7 @@ export default function AddGoal() {
   // Save the goal to AsyncStorage
   const handleSaveGoal = async () => {
     if (!name || !selectedCategory || milestones.length === 0) {
-      alert("Please fill all required fields and add at least one milestone.");
+      showAlert("Error", "Please fill all required fields and add at least one milestone.", () => {setAlertVisible(false)}, "OK");
       return;
     }
 
@@ -82,8 +98,7 @@ export default function AddGoal() {
     const existingGoals = await loadData("goals");
     const updatedGoals = [...existingGoals, newGoal];
     await saveData("goals", updatedGoals);
-
-    alert("Goal added successfully!");
+    showAlert("Updated goals", "Goal added successfully!", () => {setAlertVisible(false)}, "OK");
     router.replace("/goals");
   };
 
@@ -208,6 +223,16 @@ export default function AddGoal() {
           <Text className="text-white text-center font-bold">Save Goal</Text>
         </TouchableOpacity>
       </ScrollView>
+
+      {/* Custom Alert */}
+      <CustomAlert
+        isVisible={alertVisible}
+        title={alertTitle}
+        message={alertMessage}
+        onConfirm={alertAction}
+        onCancel={() => setAlertVisible(false)}
+        confirmText={alertConfirmText}
+      />
     </SafeAreaView>
   );
 }
