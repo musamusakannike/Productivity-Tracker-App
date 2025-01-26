@@ -1,14 +1,23 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, ScrollView, TouchableOpacity, Alert } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { loadData, saveData } from "../utils/storage";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
+import CustomAlert from "../components/UI/CustomAlert";
 
 export default function Goals() {
   const [goals, setGoals] = useState([]);
   const router = useRouter();
 
+  // Custom Alert State
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertAction, setAlertAction] = useState(() => {});
+  const [alertConfirmText, setAlertConfirmText] = useState("Confirm");
+
+  // Fetch goals from storage
   useEffect(() => {
     const fetchGoals = async () => {
       const storedGoals = await loadData("goals");
@@ -17,19 +26,26 @@ export default function Goals() {
     fetchGoals();
   }, []);
 
+  const showAlert = (title, message, action, alertText) => {
+    setAlertTitle(title);
+    setAlertMessage(message);
+    setAlertAction(() => action);
+    setAlertVisible(true);
+    setAlertConfirmText(alertText);
+  };
+
   const deleteGoal = async (goalId) => {
-    Alert.alert("Delete Goal", "Are you sure you want to delete this goal?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Delete",
-        style: "destructive",
-        onPress: async () => {
-          const updatedGoals = goals.filter((goal) => goal.id !== goalId);
-          setGoals(updatedGoals);
-          await saveData("goals", updatedGoals);
-        },
+    showAlert(
+      "Delete Goal",
+      "Are you sure you want to delete this goal?",
+      async () => {
+        const updatedGoals = goals.filter((goal) => goal.id !== goalId);
+        setGoals(updatedGoals);
+        await saveData("goals", updatedGoals);
+        setAlertVisible(false); // Hide alert after action
       },
-    ]);
+      "Delete"
+    );
   };
 
   const toggleMilestone = async (goalId, milestoneId) => {
@@ -169,6 +185,16 @@ export default function Goals() {
       >
         <Ionicons name="add" size={32} color="white" />
       </TouchableOpacity>
+
+      {/* Custom Alert */}
+      <CustomAlert
+        isVisible={alertVisible}
+        title={alertTitle}
+        message={alertMessage}
+        onConfirm={alertAction}
+        onCancel={() => setAlertVisible(false)}
+        confirmText={alertConfirmText}
+      />
     </SafeAreaView>
   );
 }
