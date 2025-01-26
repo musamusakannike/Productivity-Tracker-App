@@ -12,6 +12,69 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useColorScheme } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Picker } from "@react-native-picker/picker";
+import * as BackgroundFetch from "expo-background-fetch";
+import * as TaskManager from "expo-task-manager";
+import * as Notifications from "expo-notifications";
+
+// Define the background task name
+const BACKGROUND_FETCH_TASK = "background-timer-task";
+
+// Configure notifications
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+  }),
+});
+
+// Define the background task
+TaskManager.defineTask(BACKGROUND_FETCH_TASK, async () => {
+  const now = Date.now();
+  console.log(`Background fetch called at: ${new Date(now).toISOString()}`);
+
+  // Retrieve the timer state from AsyncStorage
+  const timerState = await AsyncStorage.getItem("timerState");
+  if (timerState) {
+    const { timeLeft, isRunning } = JSON.parse(timerState);
+
+    if (isRunning && timeLeft > 0) {
+      const newTimeLeft = timeLeft - 1;
+      await AsyncStorage.setItem(
+        "timerState",
+        JSON.stringify({ timeLeft: newTimeLeft, isRunning: newTimeLeft > 0 })
+      );
+
+      if (newTimeLeft <= 0) {
+        // Timer completed, send a notification
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title: "Time's up!",
+            body: "Great job completing your session!",
+            sound: true,
+          },
+          trigger: null, // Send immediately
+        });
+      }
+    }
+  }
+
+  return BackgroundFetch.Result.NewData;
+});
+
+// Register the background task
+async function registerBackgroundFetchAsync() {
+  return BackgroundFetch.registerTaskAsync(BACKGROUND_FETCH_TASK, {
+    minimumInterval: 60, // 1 minute (minimum interval in seconds)
+    stopOnTerminate: false, // Continue task even if app is terminated
+    startOnBoot: true, // Start task when device boots
+  });
+}
+
+// Unregister the background task
+async function unregisterBackgroundFetchAsync() {
+  return BackgroundFetch.unregisterTaskAsync(BACKGROUND_FETCH_TASK);
+}
 
 export default function TimerPage() {
   const colorScheme = useColorScheme();
@@ -27,12 +90,31 @@ export default function TimerPage() {
   const [timeLeft, setTimeLeft] = useState(0); // Time left in seconds
   const [sessions, setSessions] = useState([]);
 
-  // State for Stopwatch
-  const [stopwatchRunning, setStopwatchRunning] = useState(false);
-  const [stopwatchTime, setStopwatchTime] = useState(0);
-
   const intervalRef = useRef(null); // For Timer
-  const stopwatchIntervalRef = useRef(null); // For Stopwatch
+
+  // Request notification permissions on app start
+  useEffect(() => {
+    const requestPermissions = async () => {
+      const { status } = await Notifications.requestPermissionsAsync();
+      if (status !== "granted") {
+        console.log("Notification permissions not granted!");
+      }
+    };
+    requestPermissions();
+  }, []);
+
+  // Load timer state from AsyncStorage on app start
+  useEffect(() => {
+    const loadTimerState = async () => {
+      const timerState = await AsyncStorage.getItem("timerState");
+      if (timerState) {
+        const { timeLeft, isRunning } = JSON.parse(timerState);
+        setTimeLeft(timeLeft);
+        setIsRunning(isRunning);
+      }
+    };
+    loadTimerState();
+  }, []);
 
   // Update Timer Countdown
   useEffect(() => {
@@ -56,18 +138,44 @@ export default function TimerPage() {
     return () => clearInterval(intervalRef.current);
   }, [isRunning]);
 
-  // Update Stopwatch Time
+  // Save timer state to AsyncStorage whenever it changes
   useEffect(() => {
-    if (stopwatchRunning) {
-      stopwatchIntervalRef.current = setInterval(() => {
-        setStopwatchTime((prev) => prev + 1);
-      }, 1000);
-    } else {
-      clearInterval(stopwatchIntervalRef.current);
+    const saveTimerState = async () => {
+      await AsyncStorage.setItem(
+        "timerState",
+        JSON.stringify({ timeLeft, isRunning })
+      );
+    };
+    saveTimerState();
+  }, [timeLeft, isRunning]);
+
+  // Start Timer
+  const startTimer = () => {
+    if (hours === 0 && minutes === 0 && seconds === 0) {
+      Alert.alert(
+        "Invalid Duration",
+        "Please set a valid duration for the timer."
+      );
+      return;
     }
 
-    return () => clearInterval(stopwatchIntervalRef.current);
-  }, [stopwatchRunning]);
+    const totalSeconds = hours * 3600 + minutes * 60 + seconds;
+    setTimeLeft(totalSeconds);
+    setIsRunning(true);
+
+    // Register the background task
+    registerBackgroundFetchAsync();
+  };
+
+  // Reset Timer
+  const resetTimer = () => {
+    clearInterval(intervalRef.current);
+    setIsRunning(false);
+    setTimeLeft(0);
+
+    // Unregister the background task
+    unregisterBackgroundFetchAsync();
+  };
 
   // Save Completed Timer Session
   const saveSession = async () => {
@@ -87,28 +195,6 @@ export default function TimerPage() {
       "timerSessions",
       JSON.stringify(updatedSessions)
     );
-  };
-
-  // Start Timer
-  const startTimer = () => {
-    if (hours === 0 && minutes === 0 && seconds === 0) {
-      Alert.alert(
-        "Invalid Duration",
-        "Please set a valid duration for the timer."
-      );
-      return;
-    }
-
-    const totalSeconds = hours * 3600 + minutes * 60 + seconds;
-    setTimeLeft(totalSeconds);
-    setIsRunning(true);
-  };
-
-  // Reset Timer
-  const resetTimer = () => {
-    clearInterval(intervalRef.current);
-    setIsRunning(false);
-    setTimeLeft(0);
   };
 
   const startStopwatch = () => setStopwatchRunning(true);
@@ -255,6 +341,7 @@ export default function TimerPage() {
                   onValueChange={(itemValue) =>
                     setHours(parseInt(itemValue, 10))
                   }
+                  
                   style={{
                     backgroundColor: isDarkMode ? "#374151" : "#eee",
                     borderRadius: 10,
