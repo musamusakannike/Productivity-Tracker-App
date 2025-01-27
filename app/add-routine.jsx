@@ -146,9 +146,9 @@ export default function AddRoutine() {
         isVisible={alertVisible}
         title={alertTitle}
         message={alertMessage}
-        action={alertAction}
+        onConfirm={alertAction}
         confirmText={alertConfirmText}
-        onClose={() => setAlertVisible(false)}
+        onCancel={() => setAlertVisible(false)}
       />
     </SafeAreaView>
   );

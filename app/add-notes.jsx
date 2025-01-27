@@ -5,7 +5,6 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
-  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
@@ -29,7 +28,7 @@ export default function AddNotes() {
   const showAlert = (title, message, action, alertText) => {
     setAlertTitle(title);
     setAlertMessage(message);
-    setAlertAction(() => action);
+    setAlertAction(() => action); // Ensure action is a function
     setAlertVisible(true);
     setAlertConfirmText(alertText);
   };
@@ -50,7 +49,12 @@ export default function AddNotes() {
 
   const handleSaveNote = async () => {
     if (!body.trim()) {
-      showAlert("Error", "Note body is required.", () => {setAlertVisible(false)}, "OK");
+      showAlert(
+        "Error",
+        "Note body is required.",
+        () => setAlertVisible(false), // Pass a function to close the alert
+        "OK"
+      );
       return;
     }
 
@@ -113,9 +117,11 @@ export default function AddNotes() {
         isVisible={alertVisible}
         title={alertTitle}
         message={alertMessage}
-        action={alertAction}
         confirmText={alertConfirmText}
-        onClose={() => setAlertVisible(false)}
+        onCancel={() => setAlertVisible(false)} // Close on cancel
+        onConfirm={() => {
+          setAlertVisible(false); // Close the alert
+        }}
       />
     </SafeAreaView>
   );
