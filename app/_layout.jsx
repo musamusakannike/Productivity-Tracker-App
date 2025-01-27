@@ -1,68 +1,59 @@
-import React, { useState, useEffect } from "react"
-import { Animated, View, Text, TouchableOpacity, Dimensions, Platform } from "react-native"
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
-import { useColorScheme, StyleSheet, Image } from "react-native"
-import Ionicons from "@expo/vector-icons/Ionicons"
-import AsyncStorage from "@react-native-async-storage/async-storage"
-import "../global.css"
-import { StatusBar } from "expo-status-bar"
-import { Stack, useRouter, usePathname } from "expo-router"
+import React, { useState, useEffect } from "react";
+import {
+  Animated,
+  View,
+  Text,
+  TouchableOpacity,
+  Dimensions,
+  Platform,
+} from "react-native";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
+import { useColorScheme, StyleSheet, Image } from "react-native";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import "../global.css";
+import { StatusBar } from "expo-status-bar";
+import { Stack, useRouter, usePathname } from "expo-router";
 
 // Get screen dimensions and adjust for notch/status bar
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window")
-const STATUS_BAR_HEIGHT = Platform.OS === "ios" ? 20 : StatusBar.currentHeight || 0
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
+const STATUS_BAR_HEIGHT =
+  Platform.OS === "ios" ? 20 : StatusBar.currentHeight || 0;
 
 export default function Layout() {
-  const router = useRouter()
-  const pathname = usePathname()
-  const colorScheme = useColorScheme()
-  const isDarkMode = colorScheme === "dark"
-  const [userName, setUserName] = useState("User")
+  const router = useRouter();
+  const pathname = usePathname();
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme === "dark";
+  const [userName, setUserName] = useState("User");
   //const [sidebarHeight, setSidebarHeight] = useState(SCREEN_HEIGHT); //Removed
-  const insets = useSafeAreaInsets()
+  const insets = useSafeAreaInsets();
 
   // Sidebar animation and state
-  const [isSidebarOpen, setSidebarOpen] = useState(false)
-  const sidebarOffset = useState(new Animated.Value(-SCREEN_WIDTH))[0]
-
-  // Effect to get actual screen height - Removed
-  //useEffect(() => {
-  //  const updateSidebarHeight = () => {
-  //    const height = Dimensions.get("window").height;
-  //    setSidebarHeight(height);
-  //  };
-
-  //  // Listen for dimension changes
-  //  Dimensions.addEventListener("change", updateSidebarHeight);
-  //  updateSidebarHeight();
-
-  //  // Cleanup
-  //  return () => {
-  //    // For newer React Native versions, the cleanup is automatic
-  //    if (Dimensions.removeEventListener) {
-  //      Dimensions.removeEventListener("change", updateSidebarHeight);
-  //    }
-  //  };
-  //}, []);
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const sidebarOffset = useState(new Animated.Value(-SCREEN_WIDTH))[0];
 
   // Effect to fetch user name
   useEffect(() => {
     const fetchUserName = async () => {
       try {
-        const account = await AsyncStorage.getItem("userAccount")
+        const account = await AsyncStorage.getItem("userAccount");
         if (account) {
-          const { name } = JSON.parse(account)
+          const { name } = JSON.parse(account);
           if (name) {
-            setUserName(name)
+            setUserName(name);
           }
         }
       } catch (error) {
-        console.error("Error fetching user name:", error)
+        console.error("Error fetching user name:", error);
       }
-    }
+    };
 
-    fetchUserName()
-  }, [])
+    fetchUserName();
+  }, [isSidebarOpen]);
 
   // Toggle sidebar visibility with improved animation
   const toggleSidebar = () => {
@@ -70,9 +61,9 @@ export default function Layout() {
       toValue: isSidebarOpen ? -SCREEN_WIDTH : 0,
       duration: 300,
       useNativeDriver: true,
-    }).start()
-    setSidebarOpen(!isSidebarOpen)
-  }
+    }).start();
+    setSidebarOpen(!isSidebarOpen);
+  };
 
   // Rest of your existing code remains the same until the styles...
   const tabs = [
@@ -101,7 +92,7 @@ export default function Layout() {
       route: "/timer",
       activeRoutes: ["/timer"],
     },
-  ]
+  ];
 
   const sidebarItems = [
     { name: "Home", icon: "home-outline", route: "/" },
@@ -109,7 +100,7 @@ export default function Layout() {
     { name: "Categories", icon: "grid-outline", route: "/categories" },
     { name: "Diary", icon: "book-outline", route: "/notes" },
     { name: "Help", icon: "help-outline", route: "/help" },
-  ]
+  ];
 
   return (
     <SafeAreaView className={`flex-1 h-[100%] bg-gray-50 dark:bg-gray-900`}>
@@ -126,7 +117,10 @@ export default function Layout() {
         <View style={styles.sidebarContent}>
           {/* Header */}
           <View style={styles.sidebarHeader}>
-            <Image source={require("../assets/images/user.png")} style={styles.avatar} />
+            <Image
+              source={require("../assets/images/user.png")}
+              style={styles.avatar}
+            />
             <Text style={styles.userName}>{userName}</Text>
             <Text style={styles.date}>
               {new Date().toLocaleDateString(undefined, {
@@ -144,8 +138,8 @@ export default function Layout() {
               <TouchableOpacity
                 key={index}
                 onPress={() => {
-                  toggleSidebar()
-                  router.push(item.route)
+                  toggleSidebar();
+                  router.push(item.route);
                 }}
                 style={styles.menuItem}
               >
@@ -164,18 +158,32 @@ export default function Layout() {
 
       {/* Rest of your layout components... */}
       {/* Overlay */}
-      {isSidebarOpen && <TouchableOpacity style={styles.overlay} onPress={toggleSidebar} />}
+      {isSidebarOpen && (
+        <TouchableOpacity style={styles.overlay} onPress={toggleSidebar} />
+      )}
 
       {/* Header */}
       <View
         className={`py-4 px-6 ${isDarkMode ? "bg-gray-800" : "bg-gray-100"} ${
-          pathname === "/welcome" || pathname === "/user-details" ? "hidden" : ""
+          pathname === "/welcome" || pathname === "/user-details"
+            ? "hidden"
+            : ""
         } shadow-md flex-row items-center justify-between`}
       >
         <TouchableOpacity onPress={toggleSidebar}>
-          <Ionicons name="menu-outline" size={24} color={isDarkMode ? "#ffffff" : "#808080"} />
+          <Ionicons
+            name="menu-outline"
+            size={24}
+            color={isDarkMode ? "#ffffff" : "#808080"}
+          />
         </TouchableOpacity>
-        <Text className={`text-xl font-extrabold ${isDarkMode ? "text-gray-100" : "text-gray-800"}`}>My Life</Text>
+        <Text
+          className={`text-xl font-extrabold ${
+            isDarkMode ? "text-gray-100" : "text-gray-800"
+          }`}
+        >
+          My Life
+        </Text>
       </View>
 
       {/* Main Content */}
@@ -186,32 +194,50 @@ export default function Layout() {
       {/* Bottom Navigation */}
       <View
         className={`py-2 flex-row justify-around ${
-          isDarkMode ? "bg-gray-800 border-t border-gray-700" : "bg-white border-t border-gray-300"
-        } ${pathname === "/welcome" || pathname === "/user-details" ? "hidden" : ""}`}
+          isDarkMode
+            ? "bg-gray-800 border-t border-gray-700"
+            : "bg-white border-t border-gray-300"
+        } ${
+          pathname === "/welcome" || pathname === "/user-details"
+            ? "hidden"
+            : ""
+        }`}
       >
         {tabs.map((tab, index) => {
-          const isActive = pathname === tab.route || tab.activeRoutes.some((route) => pathname === route)
+          const isActive =
+            pathname === tab.route ||
+            tab.activeRoutes.some((route) => pathname === route);
 
           return (
-            <TouchableOpacity key={index} onPress={() => router.push(tab.route)} className="items-center">
+            <TouchableOpacity
+              key={index}
+              onPress={() => router.push(tab.route)}
+              className="items-center"
+            >
               <Ionicons
                 name={isActive ? tab.icon.replace("-outline", "") : tab.icon}
                 size={24}
-                color={isActive ? "#800020" : isDarkMode ? "#ffffff" : "#808080"}
+                color={
+                  isActive ? "#800020" : isDarkMode ? "#ffffff" : "#808080"
+                }
               />
               <Text
                 className={`text-xs mt-1 ${
-                  isActive ? "text-[#800020] font-bold" : isDarkMode ? "text-gray-400" : "text-gray-600"
+                  isActive
+                    ? "text-[#800020] font-bold"
+                    : isDarkMode
+                    ? "text-gray-400"
+                    : "text-gray-600"
                 }`}
               >
                 {tab.name}
               </Text>
             </TouchableOpacity>
-          )
+          );
         })}
       </View>
     </SafeAreaView>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -288,5 +314,4 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     opacity: 0.8,
   },
-})
-
+});
