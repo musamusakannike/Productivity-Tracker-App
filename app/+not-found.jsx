@@ -1,19 +1,30 @@
-// file: pages/+not-found.jsx
-import React from "react";
+import React, {useState, useEffect} from "react";
 import { View, Text, TouchableOpacity, Image } from "react-native";
 import { useRouter } from "expo-router";
-import { useColorScheme } from "react-native";
 import Image404 from "../assets/images/404.png";
 
 export default function NotFound() {
   const router = useRouter();
-  const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme === "dark";
+  const [theme, setTheme] = useState("light");
+
+  useEffect(() => {
+    const fetchTheme = async () => {
+      const storedTheme = await AsyncStorage.getItem("appTheme");
+      if (storedTheme) {
+        setTheme(storedTheme);
+      } else {
+        await AsyncStorage.setItem("appTheme", "light");
+        setTheme("light");
+      }
+      console.log("Theme set to:", storedTheme);
+    }
+    fetchTheme();
+  }, [])
 
   return (
     <View
       className={`flex-1 w-full h-full justify-center items-center ${
-        isDarkMode ? "bg-gray-900" : "bg-gray-100"
+        theme === "dark" ? "bg-gray-900" : "bg-gray-100"
       }`}
     >
       {/* Image or Illustration */}
@@ -26,14 +37,14 @@ export default function NotFound() {
       {/* Error Text */}
       <Text
         className={`text-4xl font-bold ${
-          isDarkMode ? "text-gray-100" : "text-gray-800"
+          theme === "dark" ? "text-gray-100" : "text-gray-800"
         }`}
       >
         Oops!
       </Text>
       <Text
         className={`text-lg text-center mt-2 ${
-          isDarkMode ? "text-gray-400" : "text-gray-600"
+          theme === "dark" ? "text-gray-400" : "text-gray-600"
         }`}
       >
         The page you&apos;re looking for doesn&apos;t exist.
@@ -43,7 +54,7 @@ export default function NotFound() {
       <TouchableOpacity
         onPress={() => router.push("/")}
         className={`mt-6 px-6 py-3 rounded-lg ${
-          isDarkMode ? "bg-[#800020]" : "bg-[#800020]"
+          theme === "dark" ? "bg-[#800020]" : "bg-[#800020]"
         }`}
       >
         <Text className="text-white font-semibold text-lg">Go to Home</Text>
