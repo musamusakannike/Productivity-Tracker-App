@@ -2,6 +2,7 @@ import React, {useState, useEffect} from "react";
 import { View, Text, TouchableOpacity, Image } from "react-native";
 import { useRouter } from "expo-router";
 import Image404 from "../assets/images/404.png";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function NotFound() {
   const router = useRouter();
