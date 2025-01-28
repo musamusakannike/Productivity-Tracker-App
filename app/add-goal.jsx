@@ -12,6 +12,7 @@ import { Ionicons } from "@expo/vector-icons"; // Import Ionicons
 import { saveData, loadData } from "../utils/storage";
 import { useRouter } from "expo-router";
 import CustomAlert from "../components/UI/CustomAlert";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function AddGoal() {
   const [categories, setCategories] = useState([]);
@@ -22,6 +23,7 @@ export default function AddGoal() {
   const [milestoneInput, setMilestoneInput] = useState("");
   const [deadline, setDeadline] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [theme, setTheme] = useState("light");
   const router = useRouter();
 
   // Custom Alert State
@@ -41,6 +43,17 @@ export default function AddGoal() {
 
   // Fetch categories from AsyncStorage
   useEffect(() => {
+    const fetchTheme = async () => {
+      const storedTheme = await AsyncStorage.getItem("appTheme");
+      if (storedTheme) {
+        setTheme(storedTheme);
+      } else {
+        await AsyncStorage.setItem("appTheme", "light");
+        setTheme("light");
+      }
+      console.log("Add goal pageTheme set to:", storedTheme);
+    };
+
     const fetchCategories = async () => {
       const storedCategories = await loadData("categories");
       if (storedCategories && storedCategories.length > 0) {
@@ -50,12 +63,32 @@ export default function AddGoal() {
           { name: "Health", icon: "fitness-outline", color: "#4CAF50" },
           { name: "Work", icon: "briefcase-outline", color: "#2196F3" },
           { name: "Personal", icon: "person-outline", color: "#FFC107" },
-          // Add more categories here
+          { name: "Hobby", icon: "brush-outline", color: "#9C27B0" },
+          { name: "Quit a Bad Habit", icon: "ban-outline", color: "#E53935" },
+          { name: "Art", icon: "color-palette-outline", color: "#673AB7" },
+          { name: "Meditation", icon: "flower-outline", color: "#00ACC1" },
+          { name: "Study", icon: "school-outline", color: "#3F51B5" },
+          {
+            name: "Entertainment",
+            icon: "musical-notes-outline",
+            color: "#F44336",
+          },
+          { name: "Sports", icon: "football-outline", color: "#4CAF50" },
+          { name: "Social", icon: "people-outline", color: "#03A9F4" },
+          { name: "Nutrition", icon: "nutrition-outline", color: "#FF9800" },
+          { name: "Finance", icon: "wallet-outline", color: "#795548" },
+          {
+            name: "Other",
+            icon: "ellipsis-horizontal-outline",
+            color: "#9E9E9E",
+          },
         ];
         setCategories(defaultCategories);
         await saveData("categories", defaultCategories);
       }
     };
+
+    fetchTheme();
     fetchCategories();
   }, []);
 
@@ -80,7 +113,14 @@ export default function AddGoal() {
   // Save the goal to AsyncStorage
   const handleSaveGoal = async () => {
     if (!name || !selectedCategory || milestones.length === 0) {
-      showAlert("Error", "Please fill all required fields and add at least one milestone.", () => {setAlertVisible(false)}, "OK");
+      showAlert(
+        "Error",
+        "Please fill all required fields and add at least one milestone.",
+        () => {
+          setAlertVisible(false);
+        },
+        "OK"
+      );
       return;
     }
 
@@ -98,14 +138,29 @@ export default function AddGoal() {
     const existingGoals = await loadData("goals");
     const updatedGoals = [...existingGoals, newGoal];
     await saveData("goals", updatedGoals);
-    showAlert("Updated goals", "Goal added successfully!", () => {setAlertVisible(false)}, "OK");
+    showAlert(
+      "Updated goals",
+      "Goal added successfully!",
+      () => {
+        setAlertVisible(false);
+      },
+      "OK"
+    );
     router.replace("/goals");
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-100 dark:bg-gray-900 px-4">
+    <SafeAreaView
+      className={`flex-1 ${
+        theme === "light" ? "bg-gray-100" : "bg-gray-900"
+      } px-4`}
+    >
       <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
-        <Text className="text-lg font-bold text-gray-800 dark:text-gray-100 mt-6 mb-4">
+        <Text
+          className={`text-lg font-bold ${
+            theme === "light" ? "text-gray-800" : "text-gray-100"
+          } mt-6 mb-4`}
+        >
           Add a New Goal
         </Text>
 
@@ -115,7 +170,11 @@ export default function AddGoal() {
           placeholderTextColor="#aaa"
           value={name}
           onChangeText={setName}
-          className="bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 p-4 rounded-lg shadow-sm mt-4"
+          className={`${
+            theme === "light"
+              ? "bg-white text-gray-800"
+              : "bg-gray-800 text-gray-100"
+          } p-4 rounded-lg shadow-sm mt-4`}
         />
 
         {/* Goal Description */}
@@ -125,11 +184,11 @@ export default function AddGoal() {
           value={description}
           onChangeText={setDescription}
           multiline
-          className="bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 p-4 rounded-lg shadow-sm mt-4"
+          className={`${theme === "light" ? "bg-white text-gray-800" : "bg-gray-800 text-gray-100"} p-4 rounded-lg shadow-sm mt-4`}
         />
 
         {/* Category Selector */}
-        <Text className="text-sm font-semibold text-gray-600 dark:text-gray-400 mt-4">
+        <Text className={`text-sm font-semibold ${theme === "light" ? "text-gray-600" : "text-gray-400"} mt-4`}>
           Select Category
         </Text>
         <View style={{ flexDirection: "row", flexWrap: "wrap", marginTop: 8 }}>
@@ -162,9 +221,9 @@ export default function AddGoal() {
         {/* Deadline Picker */}
         <TouchableOpacity
           onPress={() => setShowDatePicker(true)}
-          className="bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 p-4 rounded-lg shadow-sm mt-4"
+          className={`${theme === "light" ? "bg-white text-gray-800" : "bg-gray-800 text-gray-100"} p-4 rounded-lg shadow-sm mt-4`}
         >
-          <Text className="dark:text-gray-400">
+          <Text className={`${theme === "dark" && "text-gray-400"}`}>
             Deadline: {deadline.toDateString()}
           </Text>
         </TouchableOpacity>
@@ -181,7 +240,7 @@ export default function AddGoal() {
         )}
 
         {/* Milestones */}
-        <Text className="text-sm font-semibold text-gray-600 dark:text-gray-400 mt-4">
+        <Text className={`text-sm font-semibold ${ theme === "light" ? "text-gray-600" : "text-gray-400"} mt-4`}>
           Add Milestones
         </Text>
         <View className="flex-row items-center mt-2">
@@ -190,7 +249,7 @@ export default function AddGoal() {
             placeholderTextColor="#aaa"
             value={milestoneInput}
             onChangeText={setMilestoneInput}
-            className="flex-1 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 p-4 rounded-lg shadow-sm"
+            className={`flex-1 ${theme === "light" ? "bg-white text-gray-800" : "bg-gray-800 text-gray-100"} p-4 rounded-lg shadow-sm`}
           />
           <TouchableOpacity
             onPress={handleAddMilestone}
@@ -203,9 +262,9 @@ export default function AddGoal() {
           {milestones.map((item) => (
             <View
               key={item.id}
-              className="flex-row justify-between items-center mt-4 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm"
+              className={`flex-row justify-between items-center mt-4 ${theme === "light" ? "bg-white" : "bg-gray-800"} p-4 rounded-lg shadow-sm`}
             >
-              <Text className="text-gray-800 dark:text-gray-100">
+              <Text className={`${theme === "light" ? "text-gray-800" : "text-gray-100"} `}>
                 {item.name}
               </Text>
               <TouchableOpacity onPress={() => handleDeleteMilestone(item.id)}>
