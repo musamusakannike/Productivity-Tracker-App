@@ -75,9 +75,10 @@ export default function Settings() {
     );
   };
 
-  const toggleTheme = () => {
+  const toggleTheme = async () => {
     const newTheme = colorScheme === "light" ? "dark" : "light";
     setColorScheme(newTheme);
+    await AsyncStorage.setItem("appTheme", newTheme);
     showAlert(
       "Theme Changed",
       `The app theme is now set to ${newTheme}.`,
