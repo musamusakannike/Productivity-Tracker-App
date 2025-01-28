@@ -29,12 +29,30 @@ export default function Layout() {
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === "dark";
   const [userName, setUserName] = useState("User");
-  //const [sidebarHeight, setSidebarHeight] = useState(SCREEN_HEIGHT); //Removed
   const insets = useSafeAreaInsets();
+  const [theme, setTheme] = useState("light");
 
   // Sidebar animation and state
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const sidebarOffset = useState(new Animated.Value(-SCREEN_WIDTH))[0];
+
+  useEffect(() => {
+    const fetchTheme = async () => {
+      try {
+        const storedTheme = await AsyncStorage.getItem("appTheme");
+        if (storedTheme) {
+          setTheme(storedTheme);
+        } else {
+          AsyncStorage.setItem("appTheme", "light");
+        }
+        console.log("Theme set to:", storedTheme);
+      } catch (error) {
+        console.error("Error fetching theme:", error);
+      }
+    };
+
+    fetchTheme();
+  }, [pathname]);
 
   // Effect to fetch user name
   useEffect(() => {
@@ -103,7 +121,7 @@ export default function Layout() {
   ];
 
   return (
-    <SafeAreaView className={`flex-1 h-[100%] bg-gray-50 dark:bg-gray-900`}>
+    <SafeAreaView className={`flex-1 h-[100%] ${theme === "light" ? "bg-gray-50" : "bg-gray-900"}`}>
       <StatusBar animated />
       {/* Sidebar with dynamic height */}
       <Animated.View
