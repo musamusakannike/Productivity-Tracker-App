@@ -14,8 +14,19 @@ export default function Home() {
   const [randomQuote, setRandomQuote] = useState(null);
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === "dark";
+  const [theme, setTheme] = useState("light");
 
   useEffect(() => {
+    const fetchTheme = async () => {
+      const storedTheme = await AsyncStorage.getItem("appTheme");
+      if (storedTheme) {
+        setTheme(storedTheme);
+      } else {
+        await AsyncStorage.setItem("appTheme", "light");
+        setTheme("light");
+      }
+      console.log("Homepage Theme: ", theme);
+    }
     const checkAccount = async () => {
       const account = await AsyncStorage.getItem("userAccount");
       if (!account) {
@@ -38,6 +49,7 @@ export default function Home() {
       setRandomQuote(quotes[randomIndex]);
     };
 
+    fetchTheme();
     checkAccount();
     fetchUserName();
     pickRandomQuote();
@@ -52,31 +64,31 @@ export default function Home() {
 
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 justify-center items-center bg-gray-100 dark:bg-gray-900">
+      <SafeAreaView className={`flex-1 justify-center items-center ${theme === "light" ? "bg-gray-100" : "bg-gray-900"}`}>
         <ActivityIndicator size="large" color="#800020" />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView className={`flex-1 bg-gray-100 dark:bg-gray-900 px-6`}>
+    <SafeAreaView className={`flex-1 ${ theme === "light" ? "bg-gray-100" : "bg-gray-900"} px-6`}>
       {/* Header */}
       <View className="mt-6">
-        <Text className="text-2xl font-bold text-gray-800 dark:text-gray-100">
+        <Text className={`text-2xl font-bold ${ theme === "light" ? "text-gray-800" : "text-gray-100"}`}>
           Welcome, {userName}!
         </Text>
-        <Text className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+        <Text className={`text-sm ${theme === "light" ? "text-gray-600" : "text-gray-400"} mt-1`}>
           {today}
         </Text>
       </View>
 
       {/* Motivational Quote */}
       {randomQuote && (
-        <View className="mt-6 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
-          <Text className="text-lg font-semibold text-gray-800 dark:text-gray-100 text-center">
+        <View className={`mt-6 ${theme === "light" ? "bg-white" : "bg-gray-800"} p-4 rounded-lg shadow-sm`}>
+          <Text className={`text-lg font-semibold ${theme === "light" ? "text-gray-800" : "text-gray-100"} text-center`}>
             "{randomQuote.quote}"
           </Text>
-          <Text className="text-sm text-gray-600 dark:text-gray-400 text-center mt-2 italic">
+          <Text className={`text-sm ${theme === "light" ? "text-gray-600" : "text-gray-400"} text-center mt-2 italic`}>
             - {randomQuote.author}
           </Text>
         </View>
@@ -84,7 +96,7 @@ export default function Home() {
 
       {/* Action Buttons */}
       <View className="mt-10">
-        <Text className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4">
+        <Text className={`text-lg font-bold ${theme === "light" ? "text-gray-800" : "text-gray-100"} mb-4`}>
           Quick Actions
         </Text>
         <View className="flex-row justify-between my-2">
