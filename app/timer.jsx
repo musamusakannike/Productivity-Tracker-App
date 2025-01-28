@@ -10,7 +10,6 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useColorScheme } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Picker } from "@react-native-picker/picker";
 import * as BackgroundFetch from "expo-background-fetch";
 import * as TaskManager from "expo-task-manager";
 import * as Notifications from "expo-notifications";
@@ -257,7 +256,7 @@ export default function TimerPage() {
       setSessions(sortedSessions);
     };
     fetchSessions();
-  }, []);
+  }, [activeTab]);
 
   // Delete a session
   const deleteSession = async (index) => {
@@ -332,7 +331,6 @@ export default function TimerPage() {
 
       {activeTab === "Timer" && (
         <ScrollView className="flex-1 px-6 py-4 bg-gray-100 dark:bg-gray-900">
-          {/* Timer UI */}
           <View className="mt-6">
             {/* Timer Display */}
             {timeLeft > 0 && (
@@ -360,87 +358,54 @@ export default function TimerPage() {
               } bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100`}
             />
 
-            {/* Time Pickers */}
-            <View
-              contentContainerStyle={{ paddingBottom: 40 }}
-              className="flex-row justify-between items-center mt-6"
-            >
-              {/* Hours Picker */}
-              <View className="flex-1 flex flex-col mx-1 justify-center">
-                <Text className="text-sm font-medium text-gray-800 dark:text-gray-200 mb-2 mx-auto">
+            {/* Time Inputs */}
+            <View className="flex-row justify-between mt-6">
+              {/* Hours Input */}
+              <View className="flex-1 mx-1">
+                <Text className="text-sm font-medium text-gray-800 dark:text-gray-200 mb-2 text-center">
                   Hours
                 </Text>
-                <Picker
-                  selectedValue={hours.toString()}
-                  onValueChange={(itemValue) =>
-                    setHours(parseInt(itemValue, 10))
-                  }
-                  style={{
-                    backgroundColor: isDarkMode ? "#374151" : "#eee",
-                    borderRadius: 10,
-                    color: isDarkMode ? "#fff" : "#000",
-                  }}
-                >
-                  {Array.from({ length: 24 }, (_, i) => (
-                    <Picker.Item
-                      key={i}
-                      label={i.toString()}
-                      value={i.toString()}
-                    />
-                  ))}
-                </Picker>
+                <TextInput
+                  keyboardType="numeric"
+                  maxLength={2}
+                  value={hours}
+                  onChangeText={setHours}
+                  placeholder="HH"
+                  placeholderTextColor="#aaa"
+                  className="text-center bg-white dark:bg-gray-800 rounded-lg py-3 text-lg text-gray-800 dark:text-gray-100"
+                />
               </View>
 
-              {/* Minutes Picker */}
-              <View className="flex-1 flex flex-col mx-1 justify-center">
-                <Text className="text-sm font-medium text-gray-800 dark:text-gray-200 mb-2 mx-auto">
+              {/* Minutes Input */}
+              <View className="flex-1 mx-1">
+                <Text className="text-sm font-medium text-gray-800 dark:text-gray-200 mb-2 text-center">
                   Minutes
                 </Text>
-                <Picker
-                  selectedValue={minutes.toString()}
-                  onValueChange={(itemValue) =>
-                    setMinutes(parseInt(itemValue, 10))
-                  }
-                  style={{
-                    backgroundColor: isDarkMode ? "#374151" : "#eee",
-                    borderRadius: 10,
-                    color: isDarkMode ? "#fff" : "#000",
-                  }}
-                >
-                  {Array.from({ length: 60 }, (_, i) => (
-                    <Picker.Item
-                      key={i}
-                      label={i.toString()}
-                      value={i.toString()}
-                    />
-                  ))}
-                </Picker>
+                <TextInput
+                  keyboardType="numeric"
+                  maxLength={2}
+                  value={minutes}
+                  onChangeText={setMinutes}
+                  placeholder="MM"
+                  placeholderTextColor="#aaa"
+                  className="text-center bg-white dark:bg-gray-800 rounded-lg py-3 text-lg text-gray-800 dark:text-gray-100"
+                />
               </View>
 
-              {/* Seconds Picker */}
-              <View className="flex-1 flex flex-col mx-1 justify-center">
-                <Text className="text-sm font-medium text-gray-800 dark:text-gray-200 mb-2 mx-auto">
+              {/* Seconds Input */}
+              <View className="flex-1 mx-1">
+                <Text className="text-sm font-medium text-gray-800 dark:text-gray-200 mb-2 text-center">
                   Seconds
                 </Text>
-                <Picker
-                  selectedValue={seconds.toString()}
-                  onValueChange={(itemValue) =>
-                    setSeconds(parseInt(itemValue, 10))
-                  }
-                  style={{
-                    backgroundColor: isDarkMode ? "#374151" : "#eee",
-                    borderRadius: 10,
-                    color: isDarkMode ? "#fff" : "#000",
-                  }}
-                >
-                  {Array.from({ length: 60 }, (_, i) => (
-                    <Picker.Item
-                      key={i}
-                      label={i.toString()}
-                      value={i.toString()}
-                    />
-                  ))}
-                </Picker>
+                <TextInput
+                  keyboardType="numeric"
+                  maxLength={2}
+                  value={seconds}
+                  onChangeText={setSeconds}
+                  placeholder="SS"
+                  placeholderTextColor="#aaa"
+                  className="text-center bg-white dark:bg-gray-800 rounded-lg py-3 text-lg text-gray-800 dark:text-gray-100"
+                />
               </View>
             </View>
 
@@ -457,33 +422,6 @@ export default function TimerPage() {
                 className="flex-1 bg-red-500 py-3 rounded-lg"
               >
                 <Text className="text-white font-bold text-center">Reset</Text>
-              </TouchableOpacity>
-            </View>
-            {/* Pomodoro Buttons */}
-            <View className="flex-row justify-between mt-4">
-              <TouchableOpacity
-                onPress={() => {
-                  setHours(0);
-                  setMinutes(25);
-                  setSeconds(0);
-                }}
-                className="flex-1 bg-[#800020] py-3 rounded-lg mr-2"
-              >
-                <Text className="text-white font-bold text-center">
-                  Pomodoro
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => {
-                  setHours(0);
-                  setMinutes(5);
-                  setSeconds(0);
-                }}
-                className="flex-1 bg-gray-300 dark:bg-gray-700 py-3 rounded-lg"
-              >
-                <Text className="text-gray-800 dark:text-gray-100 font-bold text-center">
-                  Rest
-                </Text>
               </TouchableOpacity>
             </View>
           </View>
