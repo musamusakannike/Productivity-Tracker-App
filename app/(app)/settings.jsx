@@ -43,16 +43,6 @@ export default function Settings() {
   const { colorScheme, setColorScheme } = useColorScheme(); // NativeWind hook
 
   useEffect(() => {
-    const fetchTheme = async () => {
-      const storedTheme = await AsyncStorage.getItem("appTheme");
-      if (storedTheme) {
-        setTheme(storedTheme);
-      } else {
-        await AsyncStorage.setItem("appTheme", "light");
-        setTheme("light");
-      }
-      console.log("Settings page theme set to:", storedTheme);
-    };
     const fetchUserData = async () => {
       const account = await AsyncStorage.getItem("userAccount");
       if (account) {
@@ -62,7 +52,6 @@ export default function Settings() {
       }
     };
 
-    fetchTheme();
     fetchUserData();
   }, []);
 
