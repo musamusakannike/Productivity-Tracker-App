@@ -1,26 +1,13 @@
-import React, {useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, Image } from "react-native";
 import { useRouter } from "expo-router";
 import Image404 from "../assets/images/404.png";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useTheme } from "../context/ThemeContext";
 
 export default function NotFound() {
   const router = useRouter();
-  const [theme, setTheme] = useState("light");
-
-  useEffect(() => {
-    const fetchTheme = async () => {
-      const storedTheme = await AsyncStorage.getItem("appTheme");
-      if (storedTheme) {
-        setTheme(storedTheme);
-      } else {
-        await AsyncStorage.setItem("appTheme", "light");
-        setTheme("light");
-      }
-      console.log("Theme set to:", storedTheme);
-    }
-    fetchTheme();
-  }, [])
+  const { theme } = useTheme();
 
   return (
     <View
