@@ -36,20 +36,6 @@ export default function AddRoutine() {
     setAlertConfirmText(alertText);
   };
 
-  useEffect(() => {
-    const fetchTheme = async () => {
-      const storedTheme = await AsyncStorage.getItem("appTheme");
-      if (storedTheme) {
-        setTheme(storedTheme);
-      } else {
-        await AsyncStorage.setItem("appTheme", "light");
-        setTheme("light");
-      }
-      console.log("Add routine page theme set to:", storedTheme);
-    };
-    fetchTheme();
-  }, []);
-
   const handleAddTask = () => {
     if (taskInput.trim()) {
       setTasks([...tasks, { id: Date.now().toString(), name: taskInput }]);
