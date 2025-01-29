@@ -53,6 +53,7 @@ export default function Categories() {
   const [newCategoryName, setNewCategoryName] = useState("");
   const [selectedIcon, setSelectedIcon] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
+  const [theme, setTheme] = useState("light");
 
   // Custom Alert State
   const [alertVisible, setAlertVisible] = useState(false);
@@ -70,6 +71,15 @@ export default function Categories() {
   };
 
   useEffect(() => {
+    const fetchTheme = async () => {
+      const storedTheme = await AsyncStorage.getItem("appTheme");
+      if (storedTheme) {
+        setTheme(storedTheme);
+      } else {
+        await AsyncStorage.setItem("appTheme", "light");
+      }
+      console.log("Categories page theme set to:", storedTheme);
+    };
     const fetchCategories = async () => {
       const storedCategories = await AsyncStorage.getItem("categories");
       if (storedCategories) {
@@ -82,6 +92,8 @@ export default function Categories() {
         );
       }
     };
+
+    fetchTheme();
     fetchCategories();
   }, []);
 
@@ -164,8 +176,16 @@ export default function Categories() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-100 dark:bg-gray-900 px-6">
-      <Text className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">
+    <SafeAreaView
+      className={`flex-1 ${
+        theme === "light" ? "bg-gray-100" : "bg-gray-900"
+      } px-6`}
+    >
+      <Text
+        className={`text-2xl font-bold ${
+          theme === "light" ? "text-gray-800" : "text-gray-100"
+        } mb-6`}
+      >
         Categories
       </Text>
 
@@ -174,7 +194,9 @@ export default function Categories() {
         {categories.map((category, index) => (
           <View
             key={index}
-            className="flex-row justify-between items-center bg-white dark:bg-gray-800 p-4 rounded-lg mb-4"
+            className={`flex-row justify-between items-center ${
+              theme === "light" ? "bg-white" : "bg-gray-800"
+            } p-4 rounded-lg mb-4`}
           >
             <View className="flex-row items-center">
               <Ionicons
@@ -183,7 +205,11 @@ export default function Categories() {
                 color={category.color}
                 className="mr-4"
               />
-              <Text className="text-lg text-gray-800 dark:text-gray-100">
+              <Text
+                className={`${
+                  theme === "light" ? "text-gray-800" : "text-gray-100"
+                } text-lg`}
+              >
                 {category.name}
               </Text>
             </View>
@@ -200,8 +226,16 @@ export default function Categories() {
       </ScrollView>
 
       {/* Add Category */}
-      <View className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
-        <Text className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4">
+      <View
+        className={`${
+          theme === "light" ? "bg-white" : "bg-gray-800"
+        } p-4 rounded-lg shadow-sm`}
+      >
+        <Text
+          className={`text-lg font-bold ${
+            theme === "light" ? "text-gray-800" : "text-gray-100"
+          } mb-4`}
+        >
           Add New Category
         </Text>
         <TextInput
@@ -209,9 +243,17 @@ export default function Categories() {
           placeholderTextColor={"#aaa"}
           value={newCategoryName}
           onChangeText={setNewCategoryName}
-          className="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 p-3 rounded-lg mb-4"
+          className={`${
+            theme === "light"
+              ? "text-gray-800 bg-gray-200"
+              : "text-gray-100 bg-gray-700"
+          } p-3 rounded-lg mb-4`}
         />
-        <Text className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+        <Text
+          className={`text-sm ${
+            theme === "light" ? "text-gray-600" : "text-gray-400"
+          } mb-2`}
+        >
           Select Icon
         </Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -232,7 +274,11 @@ export default function Categories() {
           ))}
         </ScrollView>
 
-        <Text className="text-sm text-gray-600 dark:text-gray-400 mt-4 mb-2">
+        <Text
+          className={`text-sm ${
+            theme === "light" ? "text-gray-600" : "text-gray-400"
+          } mt-4 mb-2`}
+        >
           Select Color
         </Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
