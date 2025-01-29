@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useState, useEffect } from "react";
 import { Modal, View, Text, TouchableOpacity } from "react-native";
+import { useTheme } from "../../context/ThemeContext";
 
 export default function CustomAlert({
   isVisible,
@@ -11,21 +12,8 @@ export default function CustomAlert({
   confirmText = "Confirm",
   cancelText = "Cancel",
 }) {
-  const [theme, setTheme] = useState("light");
+  const { theme } = useTheme();
 
-  useEffect(() => {
-    const fetchTheme = async () => {
-      const storedTheme = await AsyncStorage.getItem("appTheme");
-      if (storedTheme) {
-        setTheme(storedTheme);
-      } else {
-        await AsyncStorage.setItem("appTheme", "light");
-        setTheme("light");
-      }
-      console.log("Custom alert theme set to:", storedTheme);
-    };
-    fetchTheme();
-  }, []);
   return (
     <Modal transparent visible={isVisible} animationType="fade">
       <View className="flex-1 justify-center items-center bg-black/50 min-w-52">
