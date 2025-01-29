@@ -95,22 +95,18 @@ export default function Settings() {
     router.push("/");
   };
 
+  const clearApp = async () => {
+    await AsyncStorage.clear();
+    setAlertVisible(false);
+    console.log("App memory cleared.");
+    router.push("/");
+  };
+
   const clearAppMemory = async () => {
     showAlert(
       "Clear App Memory",
       "Are you sure you want to clear all data?",
-      async () => {
-        await AsyncStorage.clear();
-        showAlert(
-          "Success",
-          "App memory cleared.",
-          () => {
-            router.push("/");
-          },
-          "OK"
-        );
-        setAlertVisible(false);
-      },
+      clearApp,
       "Clear"
     );
   };
