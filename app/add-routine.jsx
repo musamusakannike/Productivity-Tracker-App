@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -10,12 +10,14 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { saveData, loadData } from "../utils/storage";
 import CustomAlert from "../components/UI/CustomAlert";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function AddRoutine() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [tasks, setTasks] = useState([]);
   const [taskInput, setTaskInput] = useState("");
+  const [theme, setTheme] = useState("light");
   const router = useRouter();
 
   // Custom Alert State
@@ -32,6 +34,20 @@ export default function AddRoutine() {
     setAlertVisible(true);
     setAlertConfirmText(alertText);
   };
+
+  useEffect(() => {
+    const fetchTheme = async () => {
+      const storedTheme = await AsyncStorage.getItem("appTheme");
+      if (storedTheme) {
+        setTheme(storedTheme);
+      } else {
+        await AsyncStorage.setItem("appTheme", "light");
+        setTheme("light");
+      }
+      console.log("Add routine page theme set to:", storedTheme);
+    };
+    fetchTheme();
+  }, []);
 
   const handleAddTask = () => {
     if (taskInput.trim()) {
@@ -75,8 +91,16 @@ export default function AddRoutine() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-100 dark:bg-gray-900 px-6">
-      <Text className="text-lg font-bold text-gray-800 dark:text-gray-100 mt-6 mb-4">
+    <SafeAreaView
+      className={`flex-1 ${
+        theme === "light" ? "bg-gray-100" : "bg-gray-900"
+      } px-6`}
+    >
+      <Text
+        className={`text-lg font-bold ${
+          theme === "light" ? "text-gray-800" : "text-gray-100"
+        } mt-6 mb-4`}
+      >
         Add a New Routine
       </Text>
 
@@ -86,7 +110,11 @@ export default function AddRoutine() {
         placeholderTextColor={"#aaa"}
         value={name}
         onChangeText={setName}
-        className="bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 p-4 rounded-lg shadow-sm mt-4"
+        className={` ${
+          theme === "light"
+            ? "text-gray-800 bg-white"
+            : "text-gray-100 bg-gray-800"
+        } p-4 rounded-lg shadow-sm mt-4`}
       />
 
       {/* Routine Description */}
@@ -96,11 +124,19 @@ export default function AddRoutine() {
         value={description}
         onChangeText={setDescription}
         multiline
-        className="bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 p-4 rounded-lg shadow-sm mt-4"
+        className={` ${
+          theme === "light"
+            ? "text-gray-800 bg-white"
+            : "text-gray-100 bg-gray-800"
+        } p-4 rounded-lg shadow-sm mt-4`}
       />
 
       {/* Tasks */}
-      <Text className="text-sm font-semibold text-gray-600 dark:text-gray-400 mt-4">
+      <Text
+        className={`text-sm font-semibold ${
+          theme === "light" ? "text-gray-600" : "text-gray-400"
+        } mt-4`}
+      >
         Add Tasks
       </Text>
       <View className="flex-row items-center mt-2">
@@ -109,7 +145,11 @@ export default function AddRoutine() {
           placeholderTextColor={"#aaa"}
           value={taskInput}
           onChangeText={setTaskInput}
-          className="flex-1 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 p-4 rounded-lg shadow-sm"
+          className={`flex-1 ${
+            theme === "light"
+              ? "bg-white text-gray-800"
+              : "bg-gray-800 text-gray-100"
+          } p-4 rounded-lg shadow-sm`}
         />
         <TouchableOpacity
           onPress={handleAddTask}
@@ -123,8 +163,16 @@ export default function AddRoutine() {
         data={tasks}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <View className="flex-row justify-between items-center mt-4 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
-            <Text className="text-gray-800 dark:text-gray-100">
+          <View
+            className={`flex-row justify-between items-center mt-4 ${
+              theme === "light" ? "bg-white" : "bg-gray-800"
+            } p-4 rounded-lg shadow-sm`}
+          >
+            <Text
+              className={`${
+                theme === "light" ? "text-gray-800" : "text-gray-100"
+              }`}
+            >
               {item.name}
             </Text>
             <TouchableOpacity onPress={() => handleDeleteTask(item.id)}>
