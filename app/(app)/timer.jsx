@@ -115,10 +115,7 @@ export default function TimerPage() {
   // Request notification permissions on app start
   useEffect(() => {
     const requestPermissions = async () => {
-      const { status } = await Notifications.requestPermissionsAsync();
-      if (status !== "granted") {
-        console.log("Notification permissions not granted!");
-      }
+      await Notifications.requestPermissionsAsync();
     };
 
     requestPermissions();

@@ -80,7 +80,6 @@ export default function Settings() {
   const clearApp = async () => {
     await AsyncStorage.clear();
     setAlertVisible(false);
-    console.log("App memory cleared.");
     router.push("/");
   };
 
