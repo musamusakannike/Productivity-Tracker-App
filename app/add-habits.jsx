@@ -12,6 +12,7 @@ import { useRouter } from "expo-router";
 import { saveData, loadData } from "../utils/storage";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import CustomAlert from "../components/UI/CustomAlert";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const inBuiltCategories = [
   { name: "Health", icon: "fitness-outline", color: "#4CAF50" },
@@ -36,6 +37,7 @@ export default function AddHabit() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [frequency, setFrequency] = useState("Daily");
+  const [theme, setTheme] = useState("light");
   const router = useRouter();
 
   // Custom Alert State
@@ -55,6 +57,16 @@ export default function AddHabit() {
 
   // Fetch categories from AsyncStorage
   useEffect(() => {
+    const fetchTheme = async () => {
+      const storedTheme = await AsyncStorage.getItem("appTheme");
+      if (storedTheme) {
+        setTheme(storedTheme);
+      } else {
+        await AsyncStorage.setItem("appTheme", "light");
+        setTheme("light");
+      }
+      console.log("Add habit page theme set to:", storedTheme);
+    };
     const fetchCategories = async () => {
       const storedCategories = await loadData("categories");
       if (storedCategories && storedCategories.length > 0) {
@@ -65,12 +77,21 @@ export default function AddHabit() {
         await saveData("categories", inBuiltCategories);
       }
     };
+
+    fetchTheme();
     fetchCategories();
   }, []);
 
   const handleAddHabit = async () => {
     if (!name || !selectedCategory) {
-      showAlert("Error", "Please fill all required fields", () => {setAlertVisible(false)}, "OK");
+      showAlert(
+        "Error",
+        "Please fill all required fields",
+        () => {
+          setAlertVisible(false);
+        },
+        "OK"
+      );
       return;
     }
 
@@ -94,17 +115,27 @@ export default function AddHabit() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-100 dark:bg-gray-900">
+    <SafeAreaView
+      className={`flex-1 ${theme === "light" ? "bg-gray-100" : "bg-gray-900"}`}
+    >
       <ScrollView
         className="px-6"
         contentContainerStyle={{ paddingBottom: 20 }}
       >
-        <Text className="text-lg font-bold text-gray-800 dark:text-gray-100 mt-6 mb-4">
+        <Text
+          className={`text-lg font-bold ${
+            theme === "light" ? "text-gray-800" : "text-gray-100"
+          } mt-6 mb-4`}
+        >
           Add a New Habit
         </Text>
 
         {/* Category Selector */}
-        <Text className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2">
+        <Text
+          className={`text-sm font-semibold ${
+            theme === "light" ? "text-gray-600" : "text-gray-400"
+          } mb-2`}
+        >
           Select Category
         </Text>
         <FlatList
@@ -134,23 +165,33 @@ export default function AddHabit() {
         {/* Habit Name */}
         <TextInput
           placeholder="Habit Name"
+          placeholderTextColor={theme === "light" ? "#aaa" : "#aaa"}
           value={name}
           onChangeText={setName}
-          className="bg-white dark:bg-gray-800 dark:text-gray-100 p-4 rounded-lg shadow-sm mt-4 placeholder:text-gray-500"
+          className={` ${
+            theme === "light" ? "text-gray-800 bg-white" : "text-gray-100 bg-gray-800"
+          } p-4 rounded-lg shadow-sm mt-4`}
         />
 
         {/* Habit Description */}
         <TextInput
           placeholder="Optional Description"
+          placeholderTextColor={theme === "light" ? "#aaa" : "#aaa"}
           value={description}
           onChangeText={setDescription}
           multiline
-          className="bg-white dark:bg-gray-800 dark:text-gray-100 p-4 rounded-lg shadow-sm mt-4 placeholder:text-gray-500"
+          className={`bg-${theme === "light" ? "white" : "gray-800"} text-${
+            theme === "light" ? "gray-900" : "gray-100"
+          } p-4 rounded-lg shadow-sm mt-4`}
         />
 
         {/* Frequency Selector */}
         <View className="mt-4">
-          <Text className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2">
+          <Text
+            className={`text-sm font-semibold ${
+              theme === "light" ? "text-gray-600" : "text-gray-400"
+            } mb-2`}
+          >
             Frequency
           </Text>
           {["Daily", "Weekly", "Monthly"].map((freq) => (
@@ -160,14 +201,18 @@ export default function AddHabit() {
               className={`p-4 rounded-lg mb-2 ${
                 frequency === freq
                   ? "bg-[#800020] text-white"
-                  : "bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100"
+                  : ` ${
+                      theme === "light"
+                        ? "text-gray-800 bg-white"
+                        : "text-gray-100 bg-gray-800"
+                    }`
               }`}
             >
               <Text
                 className={`font-bold text-center ${
                   frequency === freq
-                    ? "text-gray-300 dark:text-gray-100"
-                    : "text-gray-600 dark:text-gray-400"
+                    ? `${theme === "light" ? "text-gray-300" : "text-gray-100"}`
+                    : `${theme === "light" ? "text-gray-600" : "text-gray-400"}`
                 }`}
               >
                 {freq}
