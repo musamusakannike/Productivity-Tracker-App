@@ -16,6 +16,7 @@ export default function Settings() {
   const [userName, setUserName] = useState("");
   const [userAge, setUserAge] = useState("");
   const [editMode, setEditMode] = useState(false);
+  const [theme, setTheme] = useState("light");
 
   // Password States
   const [currentPassword, setCurrentPassword] = useState("");
@@ -41,6 +42,16 @@ export default function Settings() {
   const { colorScheme, setColorScheme } = useColorScheme(); // NativeWind hook
 
   useEffect(() => {
+    const fetchTheme = async () => {
+      const storedTheme = await AsyncStorage.getItem("appTheme");
+      if (storedTheme) {
+        setTheme(storedTheme);
+      } else {
+        await AsyncStorage.setItem("appTheme", "light");
+        setTheme("light");
+      }
+      console.log("Settings page theme set to:", storedTheme);
+    };
     const fetchUserData = async () => {
       const account = await AsyncStorage.getItem("userAccount");
       if (account) {
@@ -50,6 +61,7 @@ export default function Settings() {
       }
     };
 
+    fetchTheme();
     fetchUserData();
   }, []);
 
@@ -76,15 +88,11 @@ export default function Settings() {
   };
 
   const toggleTheme = async () => {
-    const newTheme = colorScheme === "light" ? "dark" : "light";
-    setColorScheme(newTheme);
+    const currentTheme = await AsyncStorage.getItem("appTheme");
+    const newTheme = currentTheme === "light" ? "dark" : "light";
+    setTheme(newTheme);
     await AsyncStorage.setItem("appTheme", newTheme);
-    showAlert(
-      "Theme Changed",
-      `The app theme is now set to ${newTheme}.`,
-      () => setAlertVisible(false),
-      "OK"
-    );
+    router.push("/");
   };
 
   const clearAppMemory = async () => {
@@ -108,7 +116,9 @@ export default function Settings() {
   };
 
   const changePassword = async () => {
-    const storedPassword = JSON.parse(await AsyncStorage.getItem("notesPassword"));
+    const storedPassword = JSON.parse(
+      await AsyncStorage.getItem("notesPassword")
+    );
     // Validate current password
     if (storedPassword.trim() !== currentPassword.trim()) {
       showAlert(
@@ -145,23 +155,47 @@ export default function Settings() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-100 dark:bg-gray-900 px-6 py-4">
+    <SafeAreaView
+      className={`flex-1 ${
+        theme === "light" ? "bg-gray-100" : "bg-gray-900"
+      } px-6 py-4`}
+    >
       <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
-        <Text className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">
+        <Text
+          className={`text-2xl font-bold ${
+            theme === "light" ? "text-gray-800" : "text-gray-100"
+          } mb-6`}
+        >
           Settings
         </Text>
 
         {/* User Details */}
-        <View className="mb-8 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
-          <Text className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4">
+        <View
+          className={`mb-8 ${
+            theme === "light" ? "bg-white" : "bg-gray-800"
+          } p-4 rounded-lg shadow-sm`}
+        >
+          <Text
+            className={`text-lg font-bold ${
+              theme === "light" ? "text-gray-800" : "text-gray-100"
+            } mb-4`}
+          >
             User Details
           </Text>
           {!editMode ? (
             <View>
-              <Text className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+              <Text
+                className={`text-sm ${
+                  theme === "light" ? "text-gray-600" : "text-gray-400"
+                } mb-2`}
+              >
                 Name: {userName || "N/A"}
               </Text>
-              <Text className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+              <Text
+                className={`text-sm ${
+                  theme === "light" ? "text-gray-600" : "text-gray-400"
+                } mb-4`}
+              >
                 Age: {userAge || "N/A"}
               </Text>
               <TouchableOpacity
@@ -178,7 +212,11 @@ export default function Settings() {
                 onChangeText={setUserName}
                 placeholder="Enter your name"
                 placeholderTextColor={"#aaa"}
-                className="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 p-3 rounded-lg mb-4"
+                className={`${
+                  theme === "light"
+                    ? "bg-gray-200 text-gray-800"
+                    : "bg-gray-700 text-gray-100"
+                } p-3 rounded-lg mb-4`}
               />
               <TextInput
                 value={userAge}
@@ -186,7 +224,11 @@ export default function Settings() {
                 placeholder="Enter your age (optional)"
                 placeholderTextColor={"#aaa"}
                 keyboardType="number-pad"
-                className="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 p-3 rounded-lg mb-4"
+                className={`${
+                  theme === "light"
+                    ? "bg-gray-200 text-gray-800"
+                    : "bg-gray-700 text-gray-100"
+                } p-3 rounded-lg mb-4`}
               />
               <View className="flex-row justify-between">
                 <TouchableOpacity
@@ -209,8 +251,16 @@ export default function Settings() {
         </View>
 
         {/* Password Management */}
-        <View className="mb-8 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
-          <Text className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4">
+        <View
+          className={`mb-8 ${
+            theme === "light" ? "bg-white" : "bg-gray-800"
+          } p-4 rounded-lg shadow-sm`}
+        >
+          <Text
+            className={`text-lg font-bold ${
+              theme === "light" ? "text-gray-800" : "text-gray-100"
+            } mb-4`}
+          >
             Password Management
           </Text>
           <TextInput
@@ -219,7 +269,11 @@ export default function Settings() {
             placeholder="Current Password"
             placeholderTextColor={"#aaa"}
             secureTextEntry
-            className="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 p-3 rounded-lg mb-4"
+            className={`${
+              theme === "light"
+                ? "bg-gray-200 text-gray-800"
+                : "bg-gray-700 text-gray-100"
+            } p-3 rounded-lg mb-4`}
           />
           <TextInput
             value={newPassword}
@@ -227,7 +281,11 @@ export default function Settings() {
             placeholder="New Password"
             placeholderTextColor={"#aaa"}
             secureTextEntry
-            className="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 p-3 rounded-lg mb-4"
+            className={`${
+              theme === "light"
+                ? "bg-gray-200 text-gray-800"
+                : "bg-gray-700 text-gray-100"
+            } p-3 rounded-lg mb-4`}
           />
           <TextInput
             value={confirmNewPassword}
@@ -235,7 +293,11 @@ export default function Settings() {
             placeholder="Confirm New Password"
             placeholderTextColor={"#aaa"}
             secureTextEntry
-            className="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 p-3 rounded-lg mb-4"
+            className={`${
+              theme === "light"
+                ? "bg-gray-200 text-gray-800"
+                : "bg-gray-700 text-gray-100"
+            } p-3 rounded-lg mb-4`}
           />
           <TouchableOpacity
             onPress={changePassword}
@@ -248,8 +310,16 @@ export default function Settings() {
         </View>
 
         {/* Theme Toggle */}
-        <View className="mb-8 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
-          <Text className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4">
+        <View
+          className={`mb-8 ${
+            theme === "light" ? "bg-white" : "bg-gray-800"
+          } p-4 rounded-lg shadow-sm`}
+        >
+          <Text
+            className={`text-lg font-bold ${
+              theme === "light" ? "text-gray-800" : "text-gray-100"
+            } mb-4`}
+          >
             App Theme
           </Text>
           <TouchableOpacity
@@ -263,8 +333,16 @@ export default function Settings() {
         </View>
 
         {/* Clear App Memory */}
-        <View className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
-          <Text className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4">
+        <View
+          className={`${
+            theme === "light" ? "bg-white" : "bg-gray-800"
+          } p-4 rounded-lg shadow-sm`}
+        >
+          <Text
+            className={`text-lg font-bold ${
+              theme === "light" ? "text-gray-800" : "text-gray-100"
+            } mb-4`}
+          >
             Clear App Memory
           </Text>
           <TouchableOpacity
