@@ -5,6 +5,7 @@ import { loadData, saveData } from "../utils/storage";
 import { useRouter } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import CustomAlert from "../components/UI/CustomAlert";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const generateDates = (days) => {
   return [...Array(days)].map((_, i) => {
@@ -19,6 +20,7 @@ export default function Routines() {
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0]
   );
+  const [theme, setTheme] = useState("light");
   const dates = generateDates(30);
 
   // Custom Alert State
@@ -39,10 +41,22 @@ export default function Routines() {
   const router = useRouter();
 
   useEffect(() => {
+    const fetchTheme = async () => {
+      const storedTheme = await AsyncStorage.getItem("appTheme");
+      if (storedTheme) {
+        setTheme(storedTheme);
+      } else {
+        await AsyncStorage.setItem("appTheme", "light");
+        setTheme("light");
+      }
+      console.log("Routines page theme set to:", storedTheme);
+    };
     const fetchRoutines = async () => {
       const storedRoutines = await loadData("routines");
       setRoutines(storedRoutines || []);
     };
+
+    fetchTheme();
     fetchRoutines();
   }, []);
 
@@ -101,7 +115,9 @@ export default function Routines() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-100 dark:bg-gray-900">
+    <SafeAreaView
+      className={`flex-1 ${theme === "light" ? "bg-gray-100" : "bg-gray-900"}`}
+    >
       <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
         {/* Calendar */}
         <ScrollView
@@ -116,14 +132,18 @@ export default function Routines() {
               className={`w-16 h-16 rounded-lg mx-1 flex items-center justify-center ${
                 date === selectedDate
                   ? "bg-[#800020]"
-                  : "bg-gray-200 dark:bg-gray-700"
+                  : theme === "light"
+                  ? "bg-gray-200"
+                  : "bg-gray-700"
               }`}
             >
               <Text
                 className={`text-xs font-light ${
                   date === selectedDate
                     ? "text-white"
-                    : "text-gray-800 dark:text-gray-100"
+                    : theme === "light"
+                    ? "text-gray-800"
+                    : "text-gray-100"
                 }`}
               >
                 {new Date(date).toDateString().slice(0, 3)}
@@ -132,7 +152,9 @@ export default function Routines() {
                 className={`text-lg font-bold ${
                   date === selectedDate
                     ? "text-white"
-                    : "text-gray-800 dark:text-gray-100"
+                    : theme === "light"
+                    ? "text-gray-800"
+                    : "text-gray-100"
                 }`}
               >
                 {new Date(date).getDate()}
@@ -147,12 +169,22 @@ export default function Routines() {
             filteredRoutines.map((routine) => (
               <View
                 key={routine.id}
-                className="bg-white dark:bg-gray-800 p-4 rounded-lg mb-4"
+                className={`${
+                  theme === "light" ? "bg-white" : "bg-gray-800"
+                } p-4 rounded-lg mb-4`}
               >
-                <Text className="text-lg font-bold text-gray-800 dark:text-gray-100">
+                <Text
+                  className={`text-lg font-bold ${
+                    theme === "light" ? "text-gray-800" : "text-gray-100"
+                  }`}
+                >
                   {routine.name}
                 </Text>
-                <Text className="text-sm text-gray-600 dark:text-gray-400">
+                <Text
+                  className={`text-sm ${
+                    theme === "light" ? "text-gray-600" : "text-gray-400"
+                  }`}
+                >
                   {routine.description}
                 </Text>
                 <View className="mt-4">
@@ -161,7 +193,11 @@ export default function Routines() {
                       key={task.id}
                       className="flex-row items-center justify-between mb-2"
                     >
-                      <Text className="text-gray-800 dark:text-gray-100">
+                      <Text
+                        className={`${
+                          theme === "light" ? "text-gray-800" : "text-gray-100"
+                        }`}
+                      >
                         {task.name}
                       </Text>
                       <TouchableOpacity
@@ -175,7 +211,9 @@ export default function Routines() {
                         className={`px-4 py-2 rounded-lg ${
                           routine.history?.[selectedDate]?.[task.id]
                             ? "bg-green-500"
-                            : "bg-gray-300 dark:bg-gray-700"
+                            : theme === "light"
+                            ? "bg-gray-300"
+                            : "bg-gray-700"
                         }`}
                       >
                         <Text className="text-white font-bold">
@@ -208,10 +246,18 @@ export default function Routines() {
                 color="gray"
                 className="mb-4"
               />
-              <Text className="text-lg font-semibold text-gray-600 dark:text-gray-400 text-center">
+              <Text
+                className={`text-lg font-semibold text-center ${
+                  theme === "light" ? "text-gray-600" : "text-gray-400"
+                }`}
+              >
                 No routines found for the selected date.
               </Text>
-              <Text className="text-sm text-gray-500 dark:text-gray-400 text-center mt-2">
+              <Text
+                className={`text-sm text-center mt-2 ${
+                  theme === "light" ? "text-gray-500" : "text-gray-400"
+                }`}
+              >
                 Try selecting a different date or add a new routine.
               </Text>
               <TouchableOpacity
