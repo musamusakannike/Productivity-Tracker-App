@@ -5,6 +5,7 @@ import { useRouter } from "expo-router";
 import { loadData, saveData } from "../utils/storage";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import CustomAlert from "../components/UI/CustomAlert";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const generateDates = (days) => {
   return [...Array(days)].map((_, i) => {
@@ -19,8 +20,9 @@ export default function Habits() {
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0]
   );
+  const [theme, setTheme] = useState("light");
 
-  // Custom Alert State
+  // Custom Alert States
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertTitle, setAlertTitle] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
@@ -38,10 +40,21 @@ export default function Habits() {
   const router = useRouter();
 
   useEffect(() => {
+    const fetchTheme = async () => {
+      const storedTheme = await AsyncStorage.getItem("appTheme");
+      if (storedTheme) {
+        setTheme(storedTheme);
+      } else {
+        await AsyncStorage.setItem("appTheme", "light");
+      }
+      console.log("Habits page theme set to:", storedTheme);
+    };
     const fetchHabits = async () => {
       const storedHabits = await loadData("habits");
       setHabits(storedHabits || []);
     };
+
+    fetchTheme();
     fetchHabits();
   }, []);
 
@@ -121,7 +134,9 @@ export default function Habits() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-100 dark:bg-gray-900">
+    <SafeAreaView
+      className={`flex-1 ${theme === "light" ? "bg-gray-100" : "bg-gray-900"}`}
+    >
       <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
         {/* Calendar */}
         <ScrollView
@@ -136,14 +151,18 @@ export default function Habits() {
               className={`w-16 h-16 rounded-lg mx-1 flex items-center justify-center ${
                 date === selectedDate
                   ? "bg-[#800020]"
-                  : "bg-gray-200 dark:bg-gray-700"
+                  : theme === "light"
+                  ? "bg-gray-200"
+                  : "bg-gray-700"
               }`}
             >
               <Text
                 className={`text-xs font-light ${
                   date === selectedDate
                     ? "text-white"
-                    : "text-gray-800 dark:text-gray-100"
+                    : theme === "light"
+                    ? "text-gray-800"
+                    : "text-gray-100"
                 }`}
               >
                 {new Date(date).toDateString().slice(0, 3)} {/* Day */}
@@ -152,7 +171,9 @@ export default function Habits() {
                 className={`text-lg font-bold ${
                   date === selectedDate
                     ? "text-white"
-                    : "text-gray-800 dark:text-gray-100"
+                    : theme === "light"
+                    ? "text-gray-800"
+                    : "text-gray-100"
                 }`}
               >
                 {new Date(date).getDate()}
@@ -167,11 +188,17 @@ export default function Habits() {
             filteredHabits.map((habit) => (
               <View
                 key={habit.id}
-                className="bg-white dark:bg-gray-800 p-4 rounded-lg mb-4"
+                className={` ${
+                  theme === "light" ? "bg-white" : "bg-gray-800"
+                } p-4 rounded-lg mb-4`}
               >
                 {/* Habit Header */}
                 <View className="flex-row items-center justify-between">
-                  <Text className="text-lg font-bold text-gray-800 dark:text-gray-100">
+                  <Text
+                    className={`text-lg font-bold ${
+                      theme === "light" ? "text-gray-800" : "text-gray-100"
+                    }`}
+                  >
                     {habit.name}
                   </Text>
                   <Ionicons
@@ -241,7 +268,11 @@ export default function Habits() {
                 </View>
 
                 {/* Accuracy */}
-                <Text className="text-sm font-semibold text-gray-600 dark:text-gray-400 mt-2">
+                <Text
+                  className={`text-sm font-semibold ${
+                    theme === "light" ? "text-gray-600" : "text-gray-400"
+                  } mt-2`}
+                >
                   Accuracy: {calculateAccuracy(habit)}%
                 </Text>
               </View>
@@ -255,10 +286,18 @@ export default function Habits() {
                 color="gray"
                 className="mb-4"
               />
-              <Text className="text-lg font-semibold text-gray-600 dark:text-gray-400 text-center">
+              <Text
+                className={`text-lg font-semibold ${
+                  theme === "light" ? "text-gray-600" : "text-gray-400"
+                } text-center`}
+              >
                 No habits found for the selected date.
               </Text>
-              <Text className="text-sm text-gray-500 dark:text-gray-400 text-center mt-2">
+              <Text
+                className={`text-sm ${
+                  theme === "light" ? "text-gray-500" : "text-gray-400"
+                } text-center mt-2`}
+              >
                 Try selecting a different date or add a new habit.
               </Text>
               <TouchableOpacity
