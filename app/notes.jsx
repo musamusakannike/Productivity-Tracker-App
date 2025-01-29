@@ -23,6 +23,7 @@ export default function Notes() {
   const [passwordInput, setPasswordInput] = useState("");
   const [notesPassword, setNotesPassword] = useState(null);
   const [isSettingNewPassword, setIsSettingNewPassword] = useState(false);
+  const [theme, setTheme] = useState("light");
 
   // Custom Alert State
   const [alertVisible, setAlertVisible] = useState(false);
@@ -70,6 +71,16 @@ export default function Notes() {
   };
 
   useEffect(() => {
+    const fetchTheme = async () => {
+      const storedTheme = await AsyncStorage.getItem("appTheme");
+      if (storedTheme) {
+        setTheme(storedTheme);
+      } else {
+        await AsyncStorage.setItem("appTheme", "light");
+        setTheme("light");
+      }
+      console.log("Notes page theme set to:", storedTheme);
+    };
     const checkPassword = async () => {
       try {
         const storedPassword = await loadData("notesPassword");
@@ -89,6 +100,7 @@ export default function Notes() {
       fetchNotes();
     }
 
+    fetchTheme();
     checkPassword();
   }, [notesPassword]);
 
@@ -157,14 +169,26 @@ export default function Notes() {
       onRequestClose={() => setIsPasswordModalVisible(false)}
     >
       <View className="flex-1 justify-center items-center bg-black bg-opacity-50">
-        <View className="bg-white dark:bg-gray-800 p-6 rounded-lg w-80">
-          <Text className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+        <View
+          className={`${
+            theme === "light" ? "bg-white" : "bg-gray-800"
+          } p-6 rounded-lg w-80`}
+        >
+          <Text
+            className={`text-sm ${
+              theme === "light" ? "text-gray-600" : "text-gray-400"
+            } mb-4`}
+          >
             {isSettingNewPassword
               ? "Please set a secure password for your notes."
               : "Enter your password to access your notes."}
           </Text>
           <TextInput
-            className="border border-gray-300 dark:border-gray-700 p-2 rounded-lg mb-4 text-gray-800 dark:text-gray-100"
+            className={`border ${
+              theme === "light" ? "border-gray-300" : "border-gray-700"
+            } p-2 rounded-lg mb-4 ${
+              theme === "light" ? "text-gray-800" : "text-gray-100"
+            }`}
             placeholder="Password"
             placeholderTextColor={"#aaa"}
             secureTextEntry
@@ -220,14 +244,18 @@ export default function Notes() {
             className={`w-16 h-16 rounded-lg mx-1 flex items-center justify-center ${
               date === selectedDate
                 ? "bg-[#800020]"
-                : "bg-gray-200 dark:bg-gray-700"
+                : theme === "light"
+                ? "bg-gray-200"
+                : "bg-gray-700"
             }`}
           >
             <Text
               className={`text-xs font-light ${
                 date === selectedDate
                   ? "text-white"
-                  : "text-gray-800 dark:text-gray-100"
+                  : theme === "light"
+                  ? "text-gray-800"
+                  : "text-gray-100"
               }`}
             >
               {new Date(date).toDateString().slice(0, 3)} {/* Day */}
@@ -236,7 +264,9 @@ export default function Notes() {
               className={`text-lg font-bold ${
                 date === selectedDate
                   ? "text-white"
-                  : "text-gray-800 dark:text-gray-100"
+                  : theme === "light"
+                  ? "text-gray-800"
+                  : "text-gray-100"
               }`}
             >
               {new Date(date).getDate()}
@@ -252,10 +282,18 @@ export default function Notes() {
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-100 dark:bg-gray-900 px-6">
+    <SafeAreaView
+      className={`flex-1 ${
+        theme === "light" ? "bg-gray-100" : "bg-gray-900"
+      } px-6`}
+    >
       {renderPasswordModal()}
       <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
-        <Text className="text-lg font-bold text-gray-800 dark:text-gray-100 my-2">
+        <Text
+          className={`text-lg font-bold ${
+            theme === "light" ? "text-gray-800" : "text-gray-100"
+          } my-2`}
+        >
           Diary
         </Text>
 
@@ -265,17 +303,31 @@ export default function Notes() {
           notesForSelectedDate.map((note) => (
             <View
               key={note.id}
-              className="bg-white dark:bg-gray-800 p-4 rounded-lg mb-4 mt-4"
+              className={`${
+                theme === "light" ? "bg-white" : "bg-gray-800"
+              } p-4 rounded-lg mb-4 mt-4`}
             >
               {note.heading ? (
-                <Text className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-2">
+                <Text
+                  className={`text-lg font-bold ${
+                    theme === "light" ? "text-gray-800" : "text-gray-100"
+                  } mb-2`}
+                >
                   {note.heading}
                 </Text>
               ) : null}
-              <Text className="text-gray-600 dark:text-gray-400 mb-2">
+              <Text
+                className={`${
+                  theme === "light" ? "text-gray-600" : "text-gray-400"
+                } mb-2`}
+              >
                 {note.body}
               </Text>
-              <Text className="text-gray-400 dark:text-gray-500 text-sm">
+              <Text
+                className={`text-sm ${
+                  theme === "light" ? "text-gray-400" : "text-gray-500"
+                }`}
+              >
                 {moment(note.date).format("MMMM D, YYYY")}
               </Text>
 
@@ -307,7 +359,12 @@ export default function Notes() {
         ) : (
           <View className="mt-10 items-center">
             <Ionicons name="document-outline" size={64} color="gray" />
-            <Text className="text-lg font-semibold text-gray-600 dark:text-gray-400 text-center mt-4">
+            <Text
+              className={`text-lg font-semibold text-center mt-4 ${
+                theme === "light" ? "text-gray-600" : "text-gray-400"
+              }`}
+            >
+              {" "}
               No entries for this day.
             </Text>
             {moment(selectedDate).isSameOrAfter(moment(), "day") && (
