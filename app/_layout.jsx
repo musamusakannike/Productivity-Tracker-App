@@ -121,7 +121,11 @@ export default function Layout() {
   ];
 
   return (
-    <SafeAreaView className={`flex-1 h-[100%] ${theme === "light" ? "bg-gray-50" : "bg-gray-900"}`}>
+    <SafeAreaView
+      className={`flex-1 h-[100%] ${
+        theme === "light" ? "bg-gray-50" : "bg-gray-900"
+      }`}
+    >
       <StatusBar animated />
       {/* Sidebar with dynamic height */}
       <Animated.View
@@ -182,7 +186,7 @@ export default function Layout() {
 
       {/* Header */}
       <View
-        className={`py-4 px-6 ${isDarkMode ? "bg-gray-800" : "bg-gray-100"} ${
+        className={`py-4 px-6 ${theme === "dark" ? "bg-gray-800" : "bg-gray-100"} ${
           pathname === "/welcome" || pathname === "/user-details"
             ? "hidden"
             : ""
@@ -192,12 +196,12 @@ export default function Layout() {
           <Ionicons
             name="menu-outline"
             size={24}
-            color={isDarkMode ? "#ffffff" : "#808080"}
+            color={theme === "dark" ? "#ffffff" : "#808080"}
           />
         </TouchableOpacity>
         <Text
           className={`text-xl font-extrabold ${
-            isDarkMode ? "text-gray-100" : "text-gray-800"
+            theme === "dark" ? "text-gray-100" : "text-gray-800"
           }`}
         >
           My Life
@@ -212,7 +216,7 @@ export default function Layout() {
       {/* Bottom Navigation */}
       <View
         className={`py-2 flex-row justify-around ${
-          isDarkMode
+          theme === "dark"
             ? "bg-gray-800 border-t border-gray-700"
             : "bg-white border-t border-gray-300"
         } ${
@@ -236,14 +240,14 @@ export default function Layout() {
                 name={isActive ? tab.icon.replace("-outline", "") : tab.icon}
                 size={24}
                 color={
-                  isActive ? "#800020" : isDarkMode ? "#ffffff" : "#808080"
+                  isActive ? "#800020" : theme === "dark" ? "#ffffff" : "#808080"
                 }
               />
               <Text
                 className={`text-xs mt-1 ${
                   isActive
                     ? "text-[#800020] font-bold"
-                    : isDarkMode
+                    : theme === "dark"
                     ? "text-gray-400"
                     : "text-gray-600"
                 }`}
