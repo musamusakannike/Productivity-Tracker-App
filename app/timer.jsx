@@ -77,6 +77,7 @@ async function unregisterBackgroundFetchAsync() {
 export default function TimerPage() {
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === "dark";
+  const [theme, setTheme] = useState("light");
 
   // State for Timer
   const [activeTab, setActiveTab] = useState("Timer");
@@ -112,12 +113,24 @@ export default function TimerPage() {
 
   // Request notification permissions on app start
   useEffect(() => {
+    const fetchTheme = async () => {
+      const storedTheme = await AsyncStorage.getItem("appTheme");
+      if (storedTheme) {
+        setTheme(storedTheme);
+      } else {
+        await AsyncStorage.setItem("appTheme", "light");
+        setTheme("light");
+      }
+      console.log("Timer page theme set to:", storedTheme);
+    };
     const requestPermissions = async () => {
       const { status } = await Notifications.requestPermissionsAsync();
       if (status !== "granted") {
         console.log("Notification permissions not granted!");
       }
     };
+
+    fetchTheme();
     requestPermissions();
   }, []);
 
@@ -291,14 +304,22 @@ export default function TimerPage() {
   };
 
   return (
-    <SafeAreaView className={`flex-1 bg-gray-100 dark:bg-gray-900`}>
+    <SafeAreaView
+      className={`flex-1 ${theme === "light" ? "bg-gray-100" : "bg-gray-900"}`}
+    >
       {/* Tabs */}
-      <View className="flex-row justify-around border-b border-gray-300 dark:border-gray-700">
+      <View
+        className={`flex-row justify-around border-b ${
+          theme === "light" ? "border-gray-300" : "border-gray-700"
+        }`}
+      >
         <TouchableOpacity onPress={() => setActiveTab("Timer")}>
           <Text
             className={`text-lg font-bold py-2 ${
               activeTab === "Timer"
-                ? "text-gray-800 dark:text-gray-100"
+                ? theme === "light"
+                  ? "text-gray-800"
+                  : "text-gray-100"
                 : "text-gray-400"
             }`}
           >
@@ -309,7 +330,9 @@ export default function TimerPage() {
           <Text
             className={`text-lg font-bold py-2 ${
               activeTab === "Stopwatch"
-                ? "text-gray-800 dark:text-gray-100"
+                ? theme === "light"
+                  ? "text-gray-800"
+                  : "text-gray-100"
                 : "text-gray-400"
             }`}
           >
@@ -320,7 +343,9 @@ export default function TimerPage() {
           <Text
             className={`text-lg font-bold py-2 ${
               activeTab === "Sessions"
-                ? "text-gray-800 dark:text-gray-100"
+                ? theme === "light"
+                  ? "text-gray-800"
+                  : "text-gray-100"
                 : "text-gray-400"
             }`}
           >
@@ -330,11 +355,19 @@ export default function TimerPage() {
       </View>
 
       {activeTab === "Timer" && (
-        <ScrollView className="flex-1 px-6 py-4 bg-gray-100 dark:bg-gray-900">
+        <ScrollView
+          className={`flex-1 px-6 py-4 ${
+            theme === "light" ? "bg-gray-100" : "bg-gray-900"
+          }`}
+        >
           <View className="mt-6">
             {/* Timer Display */}
             {timeLeft > 0 && (
-              <Text className="text-4xl font-bold text-center mb-6 text-gray-800 dark:text-gray-100">
+              <Text
+                className={`text-4xl font-bold text-center mb-6 ${
+                  theme === "light" ? "text-gray-800" : "text-gray-100"
+                }`}
+              >
                 {`${Math.floor(timeLeft / 3600)
                   .toString()
                   .padStart(2, "0")}:${Math.floor((timeLeft % 3600) / 60)
@@ -355,14 +388,22 @@ export default function TimerPage() {
                 title === ""
                   ? "border border-red-500"
                   : "border border-transparent"
-              } bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100`}
+              } ${
+                theme === "light"
+                  ? "bg-white text-gray-800"
+                  : "bg-gray-800 text-gray-100"
+              }`}
             />
 
             {/* Time Inputs */}
             <View className="flex-row justify-between mt-6">
               {/* Hours Input */}
               <View className="flex-1 mx-1">
-                <Text className="text-sm font-medium text-gray-800 dark:text-gray-200 mb-2 text-center">
+                <Text
+                  className={`text-sm font-medium text-center mb-2 ${
+                    theme === "light" ? "text-gray-800" : "text-gray-200"
+                  }`}
+                >
                   Hours
                 </Text>
                 <TextInput
@@ -372,13 +413,21 @@ export default function TimerPage() {
                   onChangeText={setHours}
                   placeholder="HH"
                   placeholderTextColor="#aaa"
-                  className="text-center bg-white dark:bg-gray-800 rounded-lg py-3 text-lg text-gray-800 dark:text-gray-100"
+                  className={`text-center rounded-lg py-3 text-lg ${
+                    theme === "light"
+                      ? "text-gray-800 bg-white"
+                      : "text-gray-100 bg-gray-800 "
+                  }`}
                 />
               </View>
 
               {/* Minutes Input */}
               <View className="flex-1 mx-1">
-                <Text className="text-sm font-medium text-gray-800 dark:text-gray-200 mb-2 text-center">
+                <Text
+                  className={`text-sm font-medium ${
+                    theme === "light" ? "text-gray-800" : "text-gray-200"
+                  } mb-2 text-center`}
+                >
                   Minutes
                 </Text>
                 <TextInput
@@ -388,13 +437,22 @@ export default function TimerPage() {
                   onChangeText={setMinutes}
                   placeholder="MM"
                   placeholderTextColor="#aaa"
-                  className="text-center bg-white dark:bg-gray-800 rounded-lg py-3 text-lg text-gray-800 dark:text-gray-100"
+                  className={`text-center rounded-lg py-3 text-lg ${
+                    theme === "light"
+                      ? "text-gray-800 bg-white"
+                      : "text-gray-100 bg-gray-800"
+                  }`}
                 />
               </View>
 
               {/* Seconds Input */}
               <View className="flex-1 mx-1">
-                <Text className="text-sm font-medium text-gray-800 dark:text-gray-200 mb-2 text-center">
+                <Text
+                  className={`text-sm font-medium ${
+                    theme === "light" ? "text-gray-800" : "text-gray-200"
+                  } mb-2 text-center`}
+                >
+                  {" "}
                   Seconds
                 </Text>
                 <TextInput
@@ -404,7 +462,11 @@ export default function TimerPage() {
                   onChangeText={setSeconds}
                   placeholder="SS"
                   placeholderTextColor="#aaa"
-                  className="text-center bg-white dark:bg-gray-800 rounded-lg py-3 text-lg text-gray-800 dark:text-gray-100"
+                  className={`text-center rounded-lg py-3 text-lg ${
+                    theme === "light"
+                      ? "text-gray-800 bg-white"
+                      : "text-gray-100 bg-gray-800 "
+                  }`}
                 />
               </View>
             </View>
@@ -435,8 +497,16 @@ export default function TimerPage() {
         >
           {/* Stopwatch UI */}
           <View className="flex items-center mt-16">
-            <View className="w-64 h-64 p-3 rounded-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center shadow-md">
-              <Text className="text-5xl font-bold text-gray-800 dark:text-gray-100">
+            <View
+              className={`w-64 h-64 p-3 rounded-full ${
+                theme === "light" ? "bg-gray-200" : "bg-gray-800"
+              } flex items-center justify-center shadow-md`}
+            >
+              <Text
+                className={`text-5xl font-bold ${
+                  theme === "light" ? "text-gray-800" : "text-gray-100"
+                }`}
+              >
                 {`${Math.floor(stopwatchTime / 3600)
                   .toString()
                   .padStart(2, "0")}:${Math.floor((stopwatchTime % 3600) / 60)
@@ -481,25 +551,47 @@ export default function TimerPage() {
           contentContainerStyle={{ paddingBottom: 40 }}
           className="px-6"
         >
-          <Text className="text-lg font-bold text-gray-800 dark:text-gray-100 mt-6 mb-4">
+          <Text
+            className={`text-lg font-bold ${
+              theme === "light" ? "text-gray-800" : "text-gray-100"
+            } mt-6 mb-4`}
+          >
             Saved Sessions
           </Text>
           {sessions.length > 0 ? (
             sessions.map((session, index) => (
               <View
                 key={index}
-                className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm mb-4"
+                className={`${
+                  theme === "light" ? "bg-white" : "bg-gray-800"
+                } p-4 rounded-lg shadow-sm mb-4`}
               >
-                <Text className="text-lg font-bold text-gray-800 dark:text-gray-100">
+                <Text
+                  className={`text-lg font-bold ${
+                    theme === "light" ? "text-gray-800" : "text-gray-100"
+                  }`}
+                >
                   {session.title}
                 </Text>
-                <Text className="text-gray-600 dark:text-gray-300">
+                <Text
+                  className={`text-gray-600 ${
+                    theme === "light" ? "text-gray-600" : "text-gray-300"
+                  }`}
+                >
                   Duration: {session.duration}
                 </Text>
-                <Text className="text-gray-600 dark:text-gray-300">
+                <Text
+                  className={`text-gray-600 ${
+                    theme === "light" ? "text-gray-600" : "text-gray-300"
+                  }`}
+                >
                   Started: {session.startTime}
                 </Text>
-                <Text className="text-gray-600 dark:text-gray-300">
+                <Text
+                  className={`text-gray-600 ${
+                    theme === "light" ? "text-gray-600" : "text-gray-300"
+                  }`}
+                >
                   Ended: {session.endTime}
                 </Text>
                 <TouchableOpacity
@@ -513,7 +605,11 @@ export default function TimerPage() {
               </View>
             ))
           ) : (
-            <Text className="text-center text-gray-500 dark:text-gray-400">
+            <Text
+              className={`text-center ${
+                theme === "light" ? "text-gray-500" : "text-gray-400"
+              }`}
+            >
               No sessions saved yet.
             </Text>
           )}
