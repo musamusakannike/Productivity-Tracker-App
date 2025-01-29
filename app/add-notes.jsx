@@ -11,11 +11,13 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { loadData, saveData } from "../utils/storage";
 import moment from "moment";
 import CustomAlert from "../components/UI/CustomAlert";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function AddNotes() {
   const { noteId, date } = useLocalSearchParams();
   const [heading, setHeading] = useState("");
   const [body, setBody] = useState("");
+  const [theme, setTheme] = useState("light");
   const router = useRouter();
 
   // Custom Alert State
@@ -32,6 +34,20 @@ export default function AddNotes() {
     setAlertVisible(true);
     setAlertConfirmText(alertText);
   };
+
+  useEffect(() => {
+    const fetchTheme = async () => {
+      const storedTheme = await AsyncStorage.getItem("appTheme");
+      if (storedTheme) {
+        setTheme(storedTheme);
+      } else {
+        await AsyncStorage.setItem("appTheme", "light");
+        setTheme("light");
+      }
+      console.log("Add notes page theme set to:", storedTheme);
+    };
+    fetchTheme();
+  }, []);
 
   useEffect(() => {
     const fetchNote = async () => {
@@ -75,9 +91,17 @@ export default function AddNotes() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-100 dark:bg-gray-900 px-6">
+    <SafeAreaView
+      className={`flex-1 px-6 ${
+        theme === "light" ? "bg-gray-100" : "bg-gray-900"
+      }`}
+    >
       <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
-        <Text className="text-lg font-bold text-gray-800 dark:text-gray-100 mt-6 mb-4">
+        <Text
+          className={`text-lg font-bold ${
+            theme === "light" ? "text-gray-800" : "text-gray-100"
+          } mt-6 mb-4`}
+        >
           {noteId ? "Edit Entry" : "Add Entry"}
         </Text>
 
@@ -87,7 +111,11 @@ export default function AddNotes() {
           placeholderTextColor="#aaa"
           value={heading}
           onChangeText={setHeading}
-          className="bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 p-4 rounded-lg shadow-sm mt-4"
+          className={`p-4 rounded-lg shadow-sm mt-4 ${
+            theme === "light"
+              ? "bg-white text-gray-800"
+              : "bg-gray-800 text-gray-100"
+          }`}
         />
 
         {/* Note Body */}
@@ -97,7 +125,11 @@ export default function AddNotes() {
           value={body}
           onChangeText={setBody}
           multiline
-          className="bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 p-4 rounded-lg shadow-sm mt-4"
+          className={`p-4 rounded-lg shadow-sm mt-4 ${
+            theme === "light"
+              ? "bg-white text-gray-800"
+              : "bg-gray-800 text-gray-100"
+          }`}
           style={{ minHeight: 100 }}
         />
 
