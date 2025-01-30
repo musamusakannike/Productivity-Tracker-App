@@ -304,7 +304,7 @@ export default function Settings() {
             className="bg-[#800020] py-2 px-4 rounded-lg"
           >
             <Text className="text-white text-center font-bold">
-              Toggle to {colorScheme === "light" ? "Dark" : "Light"} Mode
+              Toggle to {theme === "light" ? "Dark" : "Light"} Mode
             </Text>
           </TouchableOpacity>
         </View>
