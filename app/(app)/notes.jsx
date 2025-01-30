@@ -14,15 +14,17 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import moment from "moment";
 import CustomAlert from "../../components/UI/CustomAlert";
 import { useTheme } from "../../context/ThemeContext";
+import { useAuth } from "../../context/AuthContext";
 
 export default function Notes() {
+  const { isAuthenticated, setAuthenticated, notesPassword, setNotesPassword } =
+    useAuth();
   const [notes, setNotes] = useState([]);
   const [selectedDate, setSelectedDate] = useState(
     moment().format("YYYY-MM-DD")
   );
   const [isPasswordModalVisible, setIsPasswordModalVisible] = useState(false);
   const [passwordInput, setPasswordInput] = useState("");
-  const [notesPassword, setNotesPassword] = useState(null);
   const [isSettingNewPassword, setIsSettingNewPassword] = useState(false);
   const { theme } = useTheme();
 
@@ -46,17 +48,7 @@ export default function Notes() {
   const loadData = async (key) => {
     try {
       const value = await AsyncStorage.getItem(key);
-      if (!value) return null;
-
-      try {
-        // Attempt to parse the data as JSON
-        return JSON.parse(value);
-      } catch (error) {
-        console.warn(
-          `Value for key "${key}" is not JSON. Returning raw value.`
-        );
-        return value; // Return the raw string if it's not JSON
-      }
+      return value ? value : null;
     } catch (error) {
       console.error(`Error loading data for key "${key}":`, error);
       return null;
@@ -65,7 +57,7 @@ export default function Notes() {
 
   const saveData = async (key, value) => {
     try {
-      await AsyncStorage.setItem(key, JSON.stringify(value));
+      await AsyncStorage.setItem(key, value);
     } catch (error) {
       console.error("Error saving data:", error);
     }
@@ -73,37 +65,29 @@ export default function Notes() {
 
   useEffect(() => {
     const checkPassword = async () => {
-      try {
-        const storedPassword = await loadData("notesPassword");
-        if (!storedPassword || storedPassword === null) {
-          setIsSettingNewPassword(true);
-          setIsPasswordModalVisible(true);
-        } else {
-          setNotesPassword(storedPassword);
-          setIsPasswordModalVisible(true);
-        }
-      } catch (error) {
-        console.error("Error loading password:", error);
+      const storedPassword = await loadData("notesPassword");
+      // console.log("Stored Password:", storedPassword);
+      if (!storedPassword) {
+        setIsSettingNewPassword(true);
+        setIsPasswordModalVisible(true);
+      } else {
+        setIsSettingNewPassword(false);
+        setIsPasswordModalVisible(true);
       }
     };
 
-    if (!isPasswordModalVisible && notesPassword) {
+    if (!isAuthenticated) {
+      checkPassword();
+      // console.log("You're not authenticated.");
+    } else {
       fetchNotes();
+      // console.log("You're authenticated.");
     }
-
-    checkPassword();
-  }, [notesPassword]);
+  }, []);
 
   const handlePasswordSubmit = async () => {
     if (passwordInput.trim() === "") {
-      showAlert(
-        "Invalid Password",
-        "Password cannot be empty.",
-        () => {
-          setAlertVisible(false);
-        },
-        "OK"
-      );
+      alert("Password cannot be empty.");
       return;
     }
 
@@ -111,40 +95,22 @@ export default function Notes() {
       try {
         await saveData("notesPassword", passwordInput);
         setNotesPassword(passwordInput);
+        setAuthenticated(true);
         setIsSettingNewPassword(false);
         setIsPasswordModalVisible(false);
-        showAlert(
-          "Success",
-          "Password has been set.",
-          () => {
-            setAlertVisible(false);
-          },
-          "OK"
-        );
       } catch (error) {
         console.error("Error saving password:", error);
-        showAlert(
-          "Error",
-          "Could not save password. Try again.",
-          () => {
-            setAlertVisible(false);
-          },
-          "OK"
-        );
+        alert("Could not save password. Try again.");
       }
     } else {
-      if (passwordInput === notesPassword) {
+      // console.log("Password input:", passwordInput, typeof passwordInput);
+      // console.log("Notes password:", notesPassword, typeof notesPassword);
+
+      if (`${passwordInput}` === notesPassword) {
+        setAuthenticated(true);
         setIsPasswordModalVisible(false);
-        fetchNotes();
       } else {
-        showAlert(
-          "Incorrect Password",
-          "Please try again.",
-          () => {
-            setAlertVisible(false);
-          },
-          "OK"
-        );
+        alert("Incorrect password. Please try again.");
       }
     }
 
@@ -165,7 +131,7 @@ export default function Notes() {
           } p-6 rounded-lg w-80`}
         >
           <Text
-            className={`text-sm ${
+            className={`${
               theme === "light" ? "text-gray-600" : "text-gray-400"
             } mb-4`}
           >
@@ -176,9 +142,7 @@ export default function Notes() {
           <TextInput
             className={`border ${
               theme === "light" ? "border-gray-300" : "border-gray-700"
-            } p-2 rounded-lg mb-4 ${
-              theme === "light" ? "text-gray-800" : "text-gray-100"
-            }`}
+            } p-2 rounded-lg mb-4`}
             placeholder="Password"
             placeholderTextColor={"#aaa"}
             secureTextEntry
@@ -198,7 +162,7 @@ export default function Notes() {
 
   const fetchNotes = async () => {
     const storedNotes = await loadData("notes");
-    setNotes(storedNotes || []);
+    setNotes(Array.isArray(storedNotes) ? storedNotes : []);
   };
 
   const deleteNote = async (noteId) => {
