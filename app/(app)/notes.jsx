@@ -83,7 +83,7 @@ export default function Notes() {
       fetchNotes();
       // console.log("You're authenticated.");
     }
-  }, []);
+  }, [isAuthenticated, notesPassword]);
 
   const handlePasswordSubmit = async () => {
     if (passwordInput.trim() === "") {
@@ -161,7 +161,9 @@ export default function Notes() {
   );
 
   const fetchNotes = async () => {
-    const storedNotes = await loadData("notes");
+    const notes = await AsyncStorage.getItem("notes");
+    const storedNotes = notes ? JSON.parse(notes) : null;
+    console.log("Stored Notes:", storedNotes);
     setNotes(Array.isArray(storedNotes) ? storedNotes : []);
   };
 
