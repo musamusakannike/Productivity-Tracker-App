@@ -66,7 +66,6 @@ export default function Notes() {
   useEffect(() => {
     const checkPassword = async () => {
       const storedPassword = await loadData("notesPassword");
-      // console.log("Stored Password:", storedPassword);
       if (!storedPassword) {
         setIsSettingNewPassword(true);
         setIsPasswordModalVisible(true);
@@ -78,10 +77,8 @@ export default function Notes() {
 
     if (!isAuthenticated) {
       checkPassword();
-      // console.log("You're not authenticated.");
     } else {
       fetchNotes();
-      // console.log("You're authenticated.");
     }
   }, [isAuthenticated, notesPassword]);
 
@@ -92,6 +89,15 @@ export default function Notes() {
     }
 
     if (isSettingNewPassword) {
+      const saveData = async (key, value) => {
+        try {
+          const serializedValue =
+            typeof value === "string" ? value : JSON.stringify(value);
+          await AsyncStorage.setItem(key, serializedValue);
+        } catch (error) {
+          console.error("Error saving data:", error);
+        }
+      };
       try {
         await saveData("notesPassword", passwordInput);
         setNotesPassword(passwordInput);
@@ -103,9 +109,6 @@ export default function Notes() {
         alert("Could not save password. Try again.");
       }
     } else {
-      // console.log("Password input:", passwordInput, typeof passwordInput);
-      // console.log("Notes password:", notesPassword, typeof notesPassword);
-
       if (`${passwordInput}` === notesPassword) {
         setAuthenticated(true);
         setIsPasswordModalVisible(false);
@@ -163,7 +166,6 @@ export default function Notes() {
   const fetchNotes = async () => {
     const notes = await AsyncStorage.getItem("notes");
     const storedNotes = notes ? JSON.parse(notes) : null;
-    console.log("Stored Notes:", storedNotes);
     setNotes(Array.isArray(storedNotes) ? storedNotes : []);
   };
 
@@ -174,7 +176,17 @@ export default function Notes() {
       async () => {
         const updatedNotes = notes.filter((note) => note.id !== noteId);
         setNotes(updatedNotes);
-        await saveData("notes", updatedNotes);
+        try {
+          const serializedValue =
+            typeof value === "string"
+              ? updatedNotes
+              : JSON.stringify(updatedNotes);
+          await AsyncStorage.setItem("notes", serializedValue);
+        } catch (error) {
+          console.error("Error deleting note:", error);
+        }
+        console.log("Note deleted successfully");
+        setAlertVisible(false); // Hide alert after action
       },
       "Delete"
     );
@@ -254,7 +266,6 @@ export default function Notes() {
         </Text>
 
         {renderDateScroll()}
-
         {notesForSelectedDate.length > 0 ? (
           notesForSelectedDate.map((note) => (
             <View

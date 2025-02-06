@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { loadData, saveData } from "../../utils/storage";
+
 import moment from "moment";
 import CustomAlert from "../../components/UI/CustomAlert";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -50,6 +50,24 @@ export default function AddNotes() {
     fetchNote();
   }, [noteId]);
 
+  const saveData = async (key, value) => {
+    try {
+      await AsyncStorage.setItem(key, JSON.stringify(value));
+    } catch (error) {
+      console.error("Error saving data:", error);
+    }
+  };
+
+  const loadData = async (key) => {
+    try {
+      const data = await AsyncStorage.getItem(key);
+      return data ? JSON.parse(data) : []; // Return an empty array if no data is found
+    } catch (error) {
+      console.error("Error loading data:", error);
+      return [];
+    }
+  };
+
   const handleSaveNote = async () => {
     if (!body.trim()) {
       showAlert(
@@ -73,7 +91,7 @@ export default function AddNotes() {
       ? existingNotes.map((n) => (n.id === noteId ? newNote : n))
       : [...existingNotes, newNote];
 
-    await saveData("notes", updatedNotes);
+    await saveData("notes", updatedNotes); // Save serialized data
     router.push("/notes");
   };
 
