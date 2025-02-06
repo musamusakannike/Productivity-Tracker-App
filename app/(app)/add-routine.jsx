@@ -151,18 +151,18 @@ export default function AddRoutine() {
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View
-            className={`flex-row justify-between items-center mt-4 ${
+            className={`flex-row w-full gap-1 justify-between items-center mt-4 ${
               theme === "light" ? "bg-white" : "bg-gray-800"
             } p-4 rounded-lg shadow-sm`}
           >
             <Text
-              className={`${
+              className={`w-[80%] ${
                 theme === "light" ? "text-gray-800" : "text-gray-100"
               }`}
             >
               {item.name}
             </Text>
-            <TouchableOpacity onPress={() => handleDeleteTask(item.id)}>
+            <TouchableOpacity onPress={() => handleDeleteTask(item.id)} className="w-[16%]">
               <Text className="text-red-500 font-bold">Delete</Text>
             </TouchableOpacity>
           </View>

@@ -143,7 +143,7 @@ export default function Goals() {
                     className="flex-row items-center justify-between mb-2"
                   >
                     <Text
-                      className={`${
+                      className={`max-w-[80%] ${
                         theme === "light" ? "text-gray-800" : "text-gray-100"
                       }`}
                     >

@@ -185,7 +185,6 @@ export default function Notes() {
         } catch (error) {
           console.error("Error deleting note:", error);
         }
-        console.log("Note deleted successfully");
         setAlertVisible(false); // Hide alert after action
       },
       "Delete"

@@ -12,7 +12,6 @@ import { Ionicons } from "@expo/vector-icons"; // Import Ionicons
 import { saveData, loadData } from "../../utils/storage";
 import { useRouter } from "expo-router";
 import CustomAlert from "../../components/UI/CustomAlert";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTheme } from "../../context/ThemeContext";
 
 export default function AddGoal() {
@@ -187,7 +186,15 @@ export default function AddGoal() {
         >
           Select Category
         </Text>
-        <View style={{ flexDirection: "row", flexWrap: "wrap", marginTop: 8 }}>
+        <View
+          style={{
+            flexDirection: "row",
+            flexWrap: "wrap",
+            marginTop: 8,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
           {categories.map((item) => (
             <TouchableOpacity
               key={item.name}
@@ -275,7 +282,7 @@ export default function AddGoal() {
               } p-4 rounded-lg shadow-sm`}
             >
               <Text
-                className={`${
+                className={`max-w-[80%] ${
                   theme === "light" ? "text-gray-800" : "text-gray-100"
                 } `}
               >
