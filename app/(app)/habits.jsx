@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, ScrollView, TouchableOpacity, Alert } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { loadData, saveData } from "../../utils/storage";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import CustomAlert from "../../components/UI/CustomAlert";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTheme } from "../../context/ThemeContext";
 
 const generateDates = (frequency) => {

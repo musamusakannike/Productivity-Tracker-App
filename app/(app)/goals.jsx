@@ -5,7 +5,6 @@ import { loadData, saveData } from "../../utils/storage";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
 import CustomAlert from "../../components/UI/CustomAlert";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTheme } from "../../context/ThemeContext";
 
 export default function Goals() {

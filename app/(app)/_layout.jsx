@@ -103,10 +103,13 @@ export default function Layout() {
   return (
     <SafeAreaView
       className={`flex-1 h-[100%] ${
-        theme === "light" ? "bg-gray-50" : "bg-gray-900"
+        theme === "light" ? "bg-gray-50" : "bg-gray-900 text-gray-200"
       }`}
     >
-      <StatusBar animated />
+      <StatusBar
+        animated
+        backgroundColor={`${theme === "dark" ? "#111827" : "#f9fafb"}`}
+      />
       {/* Sidebar with dynamic height */}
       <Animated.View
         style={[
@@ -158,7 +161,6 @@ export default function Layout() {
         </View>
       </Animated.View>
 
-      {/* Rest of your layout components... */}
       {/* Overlay */}
       {isSidebarOpen && (
         <TouchableOpacity style={styles.overlay} onPress={toggleSidebar} />
@@ -166,7 +168,7 @@ export default function Layout() {
 
       {/* Header */}
       <View
-        className={`py-4 px-6 ${
+        className={`pt-4 px-6 ${
           theme === "dark" ? "bg-gray-800" : "bg-gray-100"
         } ${
           pathname === "/welcome" || pathname === "/user-details"
