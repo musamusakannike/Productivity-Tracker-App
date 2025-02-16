@@ -8,12 +8,31 @@ import CustomAlert from "../../components/UI/CustomAlert";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTheme } from "../../context/ThemeContext";
 
-const generateDates = (days) => {
-  return [...Array(days)].map((_, i) => {
-    const date = new Date();
-    date.setDate(date.getDate() - i);
-    return date.toISOString().split("T")[0]; // Return in YYYY-MM-DD format
-  });
+const generateDates = (frequency) => {
+  const today = new Date();
+  let dates = [];
+
+  if (frequency === "Daily") {
+    dates = [...Array(30)].map((_, i) => {
+      const date = new Date(today);
+      date.setDate(today.getDate() - i);
+      return date.toISOString().split("T")[0];
+    });
+  } else if (frequency === "Weekly") {
+    dates = [...Array(4)].map((_, i) => {
+      const date = new Date(today);
+      date.setDate(today.getDate() - i * 7);
+      return date.toISOString().split("T")[0];
+    });
+  } else if (frequency === "Monthly") {
+    dates = [...Array(6)].map((_, i) => {
+      const date = new Date(today);
+      date.setMonth(today.getMonth() - i);
+      return date.toISOString().split("T")[0];
+    });
+  }
+
+  return dates;
 };
 
 export default function Habits() {
@@ -49,33 +68,62 @@ export default function Habits() {
     fetchHabits();
   }, []);
 
-  const dates = generateDates(30);
-
   // Filter habits based on whether the start date is before or equal to the selected date
   const filteredHabits = habits.filter(
     (habit) => new Date(habit.startDate) <= new Date(selectedDate)
   );
 
-  // Calculate accuracy for a habit
   const calculateAccuracy = (habit) => {
-    const { startDate, history } = habit;
+    const { startDate, history, frequency } = habit;
     if (!startDate) return 0;
-
-    // Get today's date and the start date
+  
     const start = new Date(startDate);
     const today = new Date();
-
-    // Calculate total days since the start date
-    const totalDays = Math.max(
-      Math.ceil((today - start) / (1000 * 60 * 60 * 24)),
-      1 // Ensure at least 1 day
-    );
-
-    // Count completed days
-    const completedDays = Object.values(history || {}).filter(Boolean).length;
-
+  
+    let totalExpectedDays = 0;
+    let completedDays = 0;
+  
+    if (frequency === "Daily") {
+      // Calculate total days since the start date
+      totalExpectedDays = Math.max(
+        Math.ceil((today - start) / (1000 * 60 * 60 * 24)),
+        1 // Ensure at least 1 day
+      );
+  
+      // Count completed days
+      completedDays = Object.values(history || {}).filter(Boolean).length;
+    } else if (frequency === "Weekly") {
+      // Calculate total weeks since the start date
+      totalExpectedDays = Math.max(
+        Math.ceil((today - start) / (1000 * 60 * 60 * 24 * 7)),
+        1 // Ensure at least 1 week
+      );
+  
+      // Count completed weeks
+      completedDays = Object.keys(history || {}).filter((date) => {
+        const historyDate = new Date(date);
+        return history[date] && historyDate.getDay() === start.getDay(); // Same day of the week
+      }).length;
+    } else if (frequency === "Monthly") {
+      // Calculate total months since the start date
+      totalExpectedDays = Math.max(
+        (today.getFullYear() - start.getFullYear()) * 12 +
+          (today.getMonth() - start.getMonth()),
+        1 // Ensure at least 1 month
+      );
+  
+      // Count completed months
+      completedDays = Object.keys(history || {}).filter((date) => {
+        const historyDate = new Date(date);
+        return (
+          history[date] &&
+          historyDate.getDate() === start.getDate() // Same day of the month
+        );
+      }).length;
+    }
+  
     // Calculate accuracy percentage
-    return Math.round((completedDays / totalDays) * 100);
+    return Math.round((completedDays / totalExpectedDays) * 100);
   };
 
   const toggleCompletion = async (habitId) => {
@@ -135,7 +183,7 @@ export default function Habits() {
           showsHorizontalScrollIndicator={false}
           className="px-4 mt-4 max-h-[70px]"
         >
-          {dates.map((date) => (
+          {generateDates("Daily").map((date) => (
             <TouchableOpacity
               key={date}
               onPress={() => setSelectedDate(date)}
@@ -176,98 +224,102 @@ export default function Habits() {
         {/* Habits List */}
         <View className="px-4 mt-6">
           {filteredHabits.length > 0 ? (
-            filteredHabits.map((habit) => (
-              <View
-                key={habit.id}
-                className={` ${
-                  theme === "light" ? "bg-white" : "bg-gray-800"
-                } p-4 rounded-lg mb-4`}
-              >
-                {/* Habit Header */}
-                <View className="flex-row items-center justify-between">
-                  <Text
-                    className={`text-lg font-bold ${
-                      theme === "light" ? "text-gray-800" : "text-gray-100"
-                    }`}
-                  >
-                    {habit.name}
-                  </Text>
-                  <Ionicons
-                    name={habit.icon}
-                    size={28}
-                    color={habit.backgroundColor}
-                  />
-                </View>
+            filteredHabits.map((habit) => {
+              const habitDates = generateDates(habit.frequency);
 
-                {/* Frequency Tag */}
-                <Text
-                  style={{ backgroundColor: habit.backgroundColor }}
-                  className="text-white px-2 py-1 rounded-full text-xs font-bold mt-2 self-start"
+              return (
+                <View
+                  key={habit.id}
+                  className={` ${
+                    theme === "light" ? "bg-white" : "bg-gray-800"
+                  } p-4 rounded-lg mb-4`}
                 >
-                  {habit.frequency}
-                </Text>
-
-                {/* Completion Status */}
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  className="mt-4"
-                >
-                  {dates.map((date) => (
-                    <View
-                      key={date}
-                      className={`w-10 h-10 rounded-full mx-1 flex items-center justify-center border-2 ${
-                        habit.history && habit.history[date]
-                          ? "border-green-500"
-                          : "border-red-500"
+                  {/* Habit Header */}
+                  <View className="flex-row items-center justify-between">
+                    <Text
+                      className={`text-lg font-bold ${
+                        theme === "light" ? "text-gray-800" : "text-gray-100"
                       }`}
                     >
-                      <Text
-                        className={`text-sm font-medium ${
+                      {habit.name}
+                    </Text>
+                    <Ionicons
+                      name={habit.icon}
+                      size={28}
+                      color={habit.backgroundColor}
+                    />
+                  </View>
+
+                  {/* Frequency Tag */}
+                  <Text
+                    style={{ backgroundColor: habit.backgroundColor }}
+                    className="text-white px-2 py-1 rounded-full text-xs font-bold mt-2 self-start"
+                  >
+                    {habit.frequency}
+                  </Text>
+
+                  {/* Completion Status */}
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    className="mt-4"
+                  >
+                    {habitDates.map((date) => (
+                      <View
+                        key={date}
+                        className={`w-10 h-10 rounded-full mx-1 flex items-center justify-center border-2 ${
                           habit.history && habit.history[date]
-                            ? "text-green-500"
-                            : "text-red-500"
+                            ? "border-green-500"
+                            : "border-red-500"
                         }`}
                       >
-                        {new Date(date).getDate()}
+                        <Text
+                          className={`text-sm font-medium ${
+                            habit.history && habit.history[date]
+                              ? "text-green-500"
+                              : "text-red-500"
+                          }`}
+                        >
+                          {new Date(date).getDate()}
+                        </Text>
+                      </View>
+                    ))}
+                  </ScrollView>
+
+                  {/* Actions */}
+                  <View className="flex-row justify-between items-center mt-4">
+                    {/* Mark as Done/Undone */}
+                    <TouchableOpacity
+                      onPress={() => toggleCompletion(habit.id)}
+                      className="px-4 py-2 rounded-lg bg-[#800020]"
+                    >
+                      <Text className="text-white font-bold">
+                        {habit.history?.[selectedDate]
+                          ? "Mark Undone"
+                          : "Mark Done"}
                       </Text>
-                    </View>
-                  ))}
-                </ScrollView>
+                    </TouchableOpacity>
 
-                {/* Actions */}
-                <View className="flex-row justify-between items-center mt-4">
-                  {/* Mark as Done/Undone */}
-                  <TouchableOpacity
-                    onPress={() => toggleCompletion(habit.id)}
-                    className="px-4 py-2 rounded-lg bg-[#800020]"
-                  >
-                    <Text className="text-white font-bold">
-                      {habit.history?.[selectedDate]
-                        ? "Mark Undone"
-                        : "Mark Done"}
-                    </Text>
-                  </TouchableOpacity>
+                    {/* Delete Button */}
+                    <TouchableOpacity
+                      onPress={() => deleteHabit(habit.id)}
+                      className="px-4 py-2 rounded-lg bg-red-500"
+                    >
+                      <Text className="text-white font-bold">Delete</Text>
+                    </TouchableOpacity>
+                  </View>
 
-                  {/* Delete Button */}
-                  <TouchableOpacity
-                    onPress={() => deleteHabit(habit.id)}
-                    className="px-4 py-2 rounded-lg bg-red-500"
+                  {/* Accuracy */}
+                  <Text
+                    className={`text-sm font-semibold ${
+                      theme === "light" ? "text-gray-600" : "text-gray-400"
+                    } mt-2`}
                   >
-                    <Text className="text-white font-bold">Delete</Text>
-                  </TouchableOpacity>
+                    Accuracy: {calculateAccuracy(habit)}%
+                  </Text>
                 </View>
-
-                {/* Accuracy */}
-                <Text
-                  className={`text-sm font-semibold ${
-                    theme === "light" ? "text-gray-600" : "text-gray-400"
-                  } mt-2`}
-                >
-                  Accuracy: {calculateAccuracy(habit)}%
-                </Text>
-              </View>
-            ))
+              );
+            })
           ) : (
             // Empty State Display
             <View className="mt-10 items-center">
